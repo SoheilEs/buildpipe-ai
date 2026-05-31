@@ -1,0 +1,40 @@
+export enum UserRoleEnum {
+  VIEWER = 'viewer',
+  OPERATOR = 'operator',
+  ADMIN = 'admin',
+}
+
+export enum AuditAction {
+  LOGIN = 'LOGIN',
+  LOGOUT = 'LOGOUT',
+  REGISTER = 'REGISTER',
+  REFRESH_TOKEN = 'REFRESH_TOKEN',
+  OTP_REQUESTED = 'OTP_REQUESTED',
+  OTP_VERIFIED = 'OTP_VERIFIED',
+  INCIDENT_CREATED = 'INCIDENT_CREATED',
+  INCIDENT_ANALYZED = 'INCIDENT_ANALYZED',
+  INCIDENT_RESOLVED = 'INCIDENT_RESOLVED',
+  CLUSTER_CREATED = 'CLUSTER_CREATED',
+  CLUSTER_UPDATED = 'CLUSTER_UPDATED',
+  CLUSTER_CONNECTED = 'CLUSTER_CONNECTED',
+  DEPLOYMENT_RESTARTED = 'DEPLOYMENT_RESTARTED',
+  MCP_TOOL_EXECUTED = 'MCP_TOOL_EXECUTED',
+  K8S_PODS_LISTED = 'K8S_PODS_LISTED',
+  K8S_LOGS_FETCHED = 'K8S_LOGS_FETCHED',
+  K8S_EVENTS_FETCHED = 'K8S_EVENTS_FETCHED',
+}
+
+export enum QueueJobName {
+  ANALYZE_INCIDENT = 'analyze-incident',
+  ENRICH_INCIDENT = 'enrich-incident',
+  PROCESS_LOGS = 'process-logs',
+  SYNC_METRICS = 'sync-metrics',
+  CLUSTER_HEALTH_SCAN = 'cluster-health-scan',
+}
+
+export enum QueueName {
+  INCIDENTS = 'incidents',
+  LOGS = 'logs',
+  METRICS = 'metrics',
+  HEALTH = 'health',
+}
