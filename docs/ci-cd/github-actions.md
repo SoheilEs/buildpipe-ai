@@ -4,11 +4,21 @@
 
 | Workflow | File | Triggers | Purpose | Status |
 |---|---|---|---|---|
-| CI | [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) | PR → `main`, push to `main`, manual | Install from lockfile, generate Prisma client, build all workspaces, run unit tests | M1.2 |
+| CI | [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) | PR → `main`, push to `main`, manual | Three jobs, listed below | M1.2, M1.3 |
 
-Lint, typecheck, e2e, migration, Docker and security jobs are added in later steps. The schedule is in [implementation-plan.md §4](../development/implementation-plan.md).
+e2e, migration, Docker and security jobs are added in later steps. The schedule is in [implementation-plan.md §4](../development/implementation-plan.md).
 
-## CI job: `build-test`
+## CI jobs
+
+Each job is its own check on the PR. The check name is the job `name:`, with no workflow prefix.
+
+| Check name (use this in rulesets) | Job id | Runs | Fails when |
+|---|---|---|---|
+| `Build and test` | `build-test` | `npm ci`, `prisma generate`, build, **typecheck**, unit tests | Any step fails. Typecheck also covers `*.spec.ts`, which the build skips |
+| `Static checks` | `static-checks` | `npm ci`, ESLint (`npm run lint`), Prettier (`npm run format:check`) | A lint error or an unformatted file |
+| `Workflow lint` | `workflow-lint` | actionlint v1.7.12 (`go run …@v1.7.12`; Go and shellcheck come with the runner image) | A workflow syntax, expression or shell-script problem |
+
+### `build-test` in detail
 
 ```mermaid
 flowchart LR
@@ -24,13 +34,17 @@ flowchart LR
 | Install | `npm ci --no-audit --no-fund` | `package-lock.json` is missing or out of sync with any `package.json` |
 | Prisma | `npx --no-install prisma generate` | The schema is invalid. `--no-install` forbids fetching an unpinned Prisma |
 | Build | `npm run build` → `turbo run build` | Any workspace fails to compile |
+| Typecheck | `npm run typecheck` → per-workspace `tsc --noEmit --incremental false` | A type error anywhere, including specs. `--incremental false` keeps it from writing `tsbuildinfo`, which would make a later build skip emitting |
 | Test | `npm test` → `turbo run test` | Any jest suite fails or does not compile |
 
 Run the same thing locally:
 
 ```bash
-npm ci && npx --no-install prisma generate && npm run build && npm test
+npm ci && npx --no-install prisma generate && npm run build && npm run typecheck && npm test
+npm run lint && npm run format:check   # Static checks
 ```
+
+Fix formatting with `npm run format`.
 
 ## Security conventions (apply to every workflow)
 
@@ -56,4 +70,4 @@ actionlint runs shellcheck on `run:` blocks only when `shellcheck` is installed.
 
 ## Required checks
 
-Once the workflow has run on GitHub at least once, the owner should require the **CI / Build and test** check on `main` (Settings → Rules → Rulesets). That is M1.7, tracked as blocker B3.
+Require all three checks on `main`: `Build and test`, `Static checks`, `Workflow lint` (Settings → Rules → Rulesets). That is M1.7, tracked as blocker B3. A check only appears in the picker after it has run once.
