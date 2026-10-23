@@ -1,0 +1,7 @@
+node_modules
+dist
+coverage
+.turbo
+package-lock.json
+# Docs are hand-formatted tables; prettier would rewrite them.
+*.md

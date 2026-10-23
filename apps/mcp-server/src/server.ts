@@ -114,10 +114,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
   const toolArgs = (args ?? {}) as Record<string, unknown>;
 
-  if (name === 'analyze_incident') {
-    toolArgs.incidentId = toolArgs.incidentId;
-  }
-
   const result = await callApi(name, toolArgs);
 
   return {

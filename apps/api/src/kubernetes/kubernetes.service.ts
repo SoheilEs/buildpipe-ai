@@ -36,7 +36,7 @@ export class KubernetesFacadeService {
     return result;
   }
 
-  async listDeployments(clusterId: string, namespace: string | undefined, userId: string) {
+  async listDeployments(clusterId: string, namespace: string | undefined, _userId: string) {
     const { kubeconfig, context, k8s } = await this.getK8s(clusterId);
     return k8s.deployments.list(kubeconfig, namespace, context);
   }

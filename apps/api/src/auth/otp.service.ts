@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { randomInt, randomUUID, createHash } from 'crypto';
-import { OtpPurpose, User } from '@prisma/client';
+import { OtpPurpose } from '@prisma/client';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '@buildpipe/shared-types';

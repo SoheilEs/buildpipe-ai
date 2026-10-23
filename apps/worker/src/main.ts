@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { Worker, Job, Queue, ConnectionOptions } from 'bullmq';
-import IORedis, { RedisOptions } from 'ioredis';
+import { RedisOptions } from 'ioredis';
 import { PrismaClient, IncidentStatus } from '@prisma/client';
 import { QueueJobName, QueueName, EVENT_SUBJECTS } from '@buildpipe/shared-types';
 import { connect, StringCodec } from 'nats';

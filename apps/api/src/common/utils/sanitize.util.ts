@@ -1,5 +1,7 @@
 export function sanitizeAiInput(input: string, maxLength = 8000): string {
   return input
+    // Stripping control characters is the point of this regex.
+    // eslint-disable-next-line no-control-regex
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
     .slice(0, maxLength)
     .trim();
