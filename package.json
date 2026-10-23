@@ -15,6 +15,7 @@
     "dev:ai-engine": "npm run dev -w @buildpipe/ai-engine",
     "lint": "eslint .",
     "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",

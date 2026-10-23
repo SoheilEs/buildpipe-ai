@@ -87,3 +87,25 @@ This is the first evidence from a clean Linux environment. Local Windows results
 | Post-merge push run on `main` (4f9060a) | run `39940154139` was still in progress when this was written; not yet recorded |
 
 Still not verified: Docker image builds, a real Kubernetes environment, staging. `main` has no ruleset, so the green checks are not yet enforced (B3).
+
+## 2026-10-23: M1.4 e2e smoke tests (branch `ci/m1.4-e2e-smoke`, local, Node v24.18.0)
+
+| Command | Result |
+|---|---|
+| First `jest --config ./test/jest-e2e.json` | failed to load: `@kubernetes/client-node` (ESM-only) → `SyntaxError: Unexpected token 'export'`; ts-jest also warned about transforming workspace `dist/*.js`. Fixed with a module mock and `transform` limited to `.ts` |
+| `npm run test:e2e` | exit 0, **20/20 tests**, 1 suite, about 13 s, `--detectOpenHandles` reported nothing |
+| Negative test A: run test `S11` as a normal test | fails with `Expected: "viewer"  Received: "admin"`, so the defect is real and `it.failing` fails for the right reason |
+| Negative test B: temporarily make `JwtAuthGuard` always allow | **11 of 20 tests fail** (all anonymous-denial tests plus "viewer can read clusters" shape check). Guard restored; `git diff` empty |
+| `npm run build`, `typecheck` (now also covers `test/`), `npm test`, `lint`, `format:check` | all exit 0; unit tests still 3 suites / 7 tests; `apps/api/dist/main.js` present, no e2e files in `dist` |
+| `actionlint v1.7.12` on updated `ci.yml` | exit 0 |
+| Remote GitHub run | **NOT RUN** (no PR yet) |
+
+### M1.4 follow-up: S11 fix (same branch, local)
+
+| Item | Result |
+|---|---|
+| Fix | `role` removed from `RegisterDto`; `AuthService.register` always stores `viewer`. Other role paths checked: `PATCH /users/:id` is admin-only; OAuth sign-up creates `viewer`; `seed.ts` does not use `RegisterDto` |
+| `npm run test:e2e` | **24/24** (the pinned `it.failing` test was replaced by 5 regression tests: role=admin/operator/viewer rejected with 400 and no user created; role-less registration creates a viewer; a freshly registered token gets 403 on `/audit/logs`) |
+| Mutation check: temporarily restore the old `auth.service.ts` / `auth.dto.ts` | the three "rejects role=…" tests **fail**, 21 pass; fix restored afterwards |
+| Final full run: build, typecheck, unit (3 suites / 7 tests), e2e (24), lint, prettier | all exit 0 |
+| Behaviour change | clients that sent `role` on register now receive 400 instead of an account with that role. No client in this repo does |

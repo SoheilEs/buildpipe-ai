@@ -59,6 +59,9 @@ jobs:
       - name: Unit tests
         run: npm test
 
+      - name: End-to-end smoke tests
+        run: npm run test:e2e
+
   static-checks:
     name: Static checks
     runs-on: ubuntu-24.04

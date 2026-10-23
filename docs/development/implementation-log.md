@@ -71,3 +71,18 @@
 - The assumption that runners ship Go held; the shellcheck assumption is not evidenced and is recorded as such.
 - **Open:** B3. `GET /repos/SoheilEs/buildpipe-ai/rulesets` still returns none, so `main` accepts direct pushes and unreviewed merges.
 - **Next:** owner creates the ruleset; then M1.4.
+
+## 2026-10-23: M1.4 e2e harness and API smoke test
+
+- **Branch:** `ci/m1.4-e2e-smoke` (from `main` at the M1.3 merge). Nothing committed yet.
+- **What:** `apps/api/test/{jest-e2e.json,setup-env.ts,api.e2e-spec.ts}`; `apps/api/src/app.setup.ts` extracted from `main.ts` so tests and production share one HTTP setup (behaviour unchanged); `LOG_LEVEL` env for pino (default `info`); `tsconfig.json` now includes `test/` so e2e specs are type-checked (the build config still excludes them); root `test:e2e` script + turbo task; ESLint jest globals for `*.e2e-spec.ts`; CI step in `Build and test`.
+- **Decision:** run the real `AppModule` with stubs for infrastructure only, rather than a hand-built mini app. This is what makes the auth/RBAC tests meaningful, and the mutation test shows they fail when the guard is removed.
+- **Finding S11 (critical):** discovered while writing the validation tests. `POST /auth/register` is public and honours `role: "admin"`. Documented in the audit and pinned with a failing-by-design test. **Not fixed in M1.4** (scope); recommended as the first item of M2.
+- **Known limits:** infrastructure is stubbed, so this does not test persistence, queues, NATS or Kubernetes.
+- **Next:** review, commit, push, PR, first remote run.
+
+### S11 fix (M1.4 branch)
+
+- `RegisterDto` no longer has `role`; `register` always creates a `viewer`. The global `forbidNonWhitelisted` pipe turns a payload containing `role` into a 400, which is deliberate: callers learn the field is not accepted instead of silently getting a lower role.
+- The pinned `it.failing` test is replaced by regression tests. Verified they fail against the old code.
+- **Not addressed (still in M2):** no rate limit or email verification on `/auth/register`, and the first admin must come from seeding. Existing deployments built from earlier code may already contain attacker-created admin users and should be reviewed.

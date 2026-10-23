@@ -10,11 +10,11 @@ IMPLEMENTED means the code exists. VERIFIED means tests or CI evidence are recor
 | M1.1 | Make main build: lockfile, packageManager, Node pin, spec fix | VERIFIED (CI) | CI run 39938152396 green: build 8/8, tests 7/7 ([results](test-results.md)) | this file, implementation-log | Docker build unverified (daemon not running locally) |
 | M1.2 | Minimal `ci.yml` | VERIFIED (CI) | actionlint clean; PR run 39938152396 green | [github-actions.md](../ci-cd/github-actions.md) | PR #1 awaiting owner merge; required check not yet enforced (B3) |
 | M1.3 | Static checks: ESLint, Prettier, typecheck, actionlint | VERIFIED (CI) | PR run 39939976084: all 3 checks green ([results](test-results.md)) | [github-actions.md](../ci-cd/github-actions.md) | Merged in PR #2 (4f9060a) |
-| M1.4 | e2e harness + API smoke | NOT_STARTED | — | — | M1.2 |
+| M1.4 | e2e harness + API smoke | IMPLEMENTED | 24 e2e tests pass locally; **not yet run on GitHub** ([results](test-results.md)) | [github-actions.md](../ci-cd/github-actions.md) | Branch `ci/m1.4-e2e-smoke`, awaiting review |
 | M1.5 | Migration validation job | NOT_STARTED | — | — | M3 |
 | M1.6 | Docker build check | NOT_STARTED | — | — | M4 |
 | M1.7 | Branch protection | NOT_STARTED | — | — | B3 |
-| M2 | Security hardening S1–S5, S9, S10 | NOT_STARTED | — | [audit.md §6](audit.md) | — |
+| M2 | Security hardening S1–S5, S9, S10 (S11 fixed in M1.4) | NOT_STARTED | — | [audit.md §6](audit.md) | — |
 | M3 | Postgres + migrations + tenancy | NOT_STARTED | — | — | — |
 | M4 | Container hardening + `security.yml` | NOT_STARTED | — | — | — |
 | M5 | GHCR build/publish | NOT_STARTED | — | — | — |
@@ -29,4 +29,4 @@ IMPLEMENTED means the code exists. VERIFIED means tests or CI evidence are recor
 
 ## Resume point
 
-Next action: owner creates the `protect-main` ruleset requiring `Build and test`, `Static checks`, `Workflow lint` (B3, still open: no ruleset exists). Then **M1.4** (e2e harness + API smoke).
+Next action: owner reviews and merges PR #4 (M1.4 + the S11 fix), then creates the `protect-main` ruleset requiring `Build and test`, `Static checks`, `Workflow lint` (B3, still open: no ruleset exists). Then **M2** covers the remaining findings S1–S5, S9, S10.
