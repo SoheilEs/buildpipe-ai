@@ -74,3 +74,16 @@ This is the first evidence from a clean Linux environment. Local Windows results
 | `npm run build`, `npm test` after formatting | exit 0; 8/8 build tasks, 3 suites / 7 tests |
 | `actionlint v1.7.12` on the updated `ci.yml` | exit 0 (local run has no shellcheck, so shell-script checks are skipped locally) |
 | Remote GitHub run | **NOT RUN**. Unconfirmed until it runs: that the runner has Go and shellcheck preinstalled for the `Workflow lint` job |
+
+### M1.3: first remote run (verified in CI)
+
+| Item | Result |
+|---|---|
+| Run | [`39939976084`](https://github.com/SoheilEs/buildpipe-ai/actions/runs/39939976084), event `pull_request` (PR #2), commit `250d39a` |
+| `Build and test` | success, 50 s: build 8/8, typecheck 12/12, tests 3 suites / 7 tests |
+| `Static checks` | success, 31 s: ESLint clean, "All matched files use Prettier code style!" |
+| `Workflow lint` | success, 19 s: `go run …actionlint@v1.7.12` ran on the runner's preinstalled Go (module downloaded through the Go proxy) |
+| Not shown by the logs | Whether shellcheck ran inside actionlint. Treat shell-script linting as unverified until a deliberately bad `run:` snippet is seen to fail |
+| Post-merge push run on `main` (4f9060a) | run `39940154139` was still in progress when this was written; not yet recorded |
+
+Still not verified: Docker image builds, a real Kubernetes environment, staging. `main` has no ruleset, so the green checks are not yet enforced (B3).
