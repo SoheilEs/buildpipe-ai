@@ -5,7 +5,8 @@
   "scripts": {
     "build": "nest build",
     "dev": "nest start --watch",
-    "start": "node dist/main"
+    "start": "node dist/main",
+    "typecheck": "tsc --noEmit --incremental false -p tsconfig.json"
   },
   "dependencies": {
     "@buildpipe/ai-sdk": "*",

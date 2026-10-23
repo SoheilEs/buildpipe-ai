@@ -2,23 +2,23 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 5s
       timeout: 3s
       retries: 5
 
   nats:
     image: nats:2-alpine
-    command: ["-js", "-m", "8222"]
+    command: ['-js', '-m', '8222']
     ports:
-      - "4222:4222"
-      - "8222:8222"
+      - '4222:4222'
+      - '8222:8222'
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8222/healthz"]
+      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:8222/healthz']
       interval: 5s
       timeout: 3s
       retries: 5
@@ -28,7 +28,7 @@ services:
       context: .
       dockerfile: infrastructure/docker/api.Dockerfile
     ports:
-      - "3000:3000"
+      - '3000:3000'
     env_file:
       - .env
     environment:
@@ -73,7 +73,7 @@ services:
       context: .
       dockerfile: infrastructure/docker/ai-engine.Dockerfile
     ports:
-      - "3001:3001"
+      - '3001:3001'
     env_file:
       - .env
     environment:

@@ -47,3 +47,20 @@
 - PR #1 run `39938152396` passed (build 8/8, tests 7/7) on a clean `ubuntu-24.04` runner. M1.1 and M1.2 are therefore VERIFIED in CI. Evidence is in [test-results.md](test-results.md).
 - Auto-fix monitoring is enabled for PR #1.
 - **Next:** owner merges PR #1 and sets the required check; then M1.3.
+
+## 2026-10-23: M1.3 static checks
+
+- **Branch:** `ci/m1.3-static-checks` (from `main` at 6439ad1). Three commits: tooling + lint fixes + CI jobs; pure Prettier reformat; `format:check` gate (with docs).
+- **What:**
+  - Deleted `prisma/prisma.config.ts`. It was byte-swapped UTF-16 read as UTF-8, not TypeScript. Prisma never loaded it.
+  - ESLint 10 flat config with typescript-eslint `recommended` and `eslint-config-prettier`. Deliberately not type-aware yet, to keep the first gate cheap. 8 existing findings fixed.
+  - Per-workspace `typecheck` using `tsc --noEmit --incremental false`. Without `--incremental false`, a noEmit run writes `dist/.tsbuildinfo` and a later build would skip emitting (the M1.1 bug).
+  - Prettier (single quotes, trailing commas, width 100). Markdown is excluded because the docs use hand-aligned tables.
+  - `ci.yml`: typecheck step added to `Build and test`; new `Static checks` and `Workflow lint` jobs.
+- **Deviations from the plan:** the old per-package `eslint "{src,test}/**/*.ts"` script and the turbo `lint` task were removed. ESLint runs once from the root.
+- **Findings for later milestones:**
+  - Prisma 7 will drop `package.json#prisma` (seed config). Migrate to `prisma.config.ts` when upgrading Prisma, and use a valid file this time.
+  - `infrastructure/scripts/fix-encoding.ps1` is stored as UTF-16LE without a BOM and cannot be parsed by PowerShell 5.1. It is the likely source of the corrupt config. Left untouched for now. Recommend deleting it: `.gitattributes` and CI now enforce encoding.
+  - `KubernetesFacadeService.listDeployments` accepts `userId` but never audits the call (the other read methods do). Renamed the parameter to `_userId` to satisfy lint. Belongs in the M2 hardening list.
+- **Tests:** [test-results.md](test-results.md) (M1.3 section). Not yet run remotely.
+- **Next:** owner review, push, PR, first remote run.

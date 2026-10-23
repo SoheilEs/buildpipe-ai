@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -118,10 +114,7 @@ export class AuthService {
   }): Promise<User> {
     const existing = await this.prisma.user.findFirst({
       where: {
-        OR: [
-          { email: data.email },
-          { provider: data.provider, providerId: data.providerId },
-        ],
+        OR: [{ email: data.email }, { provider: data.provider, providerId: data.providerId }],
         deletedAt: null,
       },
     });

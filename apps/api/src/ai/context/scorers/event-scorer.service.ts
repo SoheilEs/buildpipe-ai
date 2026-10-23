@@ -28,8 +28,6 @@ export class EventScorerService {
   }
 
   scoreAll(events: EventSummary[]): Array<EventSummary & { score: number }> {
-    return events
-      .map((e) => ({ ...e, score: this.score(e) }))
-      .sort((a, b) => b.score - a.score);
+    return events.map((e) => ({ ...e, score: this.score(e) })).sort((a, b) => b.score - a.score);
   }
 }

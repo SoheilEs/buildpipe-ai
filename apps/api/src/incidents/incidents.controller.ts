@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Query,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { IncidentStatus, User, UserRole } from '@prisma/client';
 import { Throttle } from '@nestjs/throttler';
@@ -56,22 +48,14 @@ export class IncidentsController {
   @Roles(UserRole.operator)
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @ApiOperation({ summary: 'Trigger AI analysis for incident' })
-  analyze(
-    @Param('id') id: string,
-    @CurrentUser() user: User,
-    @Body() dto: AnalyzeIncidentDto,
-  ) {
+  analyze(@Param('id') id: string, @CurrentUser() user: User, @Body() dto: AnalyzeIncidentDto) {
     return this.incidentsService.analyze(id, user.id, dto);
   }
 
   @Post(':id/resolve')
   @Roles(UserRole.operator)
   @ApiOperation({ summary: 'Resolve an incident' })
-  resolve(
-    @Param('id') id: string,
-    @CurrentUser() user: User,
-    @Body() dto: ResolveIncidentDto,
-  ) {
+  resolve(@Param('id') id: string, @CurrentUser() user: User, @Body() dto: ResolveIncidentDto) {
     return this.incidentsService.resolve(id, user.id, dto);
   }
 }

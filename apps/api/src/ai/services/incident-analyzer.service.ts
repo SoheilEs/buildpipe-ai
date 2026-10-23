@@ -47,7 +47,11 @@ export class ContextEngineService {
       namespace: incident.namespace,
     });
 
-    const pods = await k8s.pods.list(kubeconfig, incident.namespace ?? undefined, context ?? undefined);
+    const pods = await k8s.pods.list(
+      kubeconfig,
+      incident.namespace ?? undefined,
+      context ?? undefined,
+    );
     ctx = this.builder.withPods(ctx, pods);
 
     const events = await k8s.events.listEvents(

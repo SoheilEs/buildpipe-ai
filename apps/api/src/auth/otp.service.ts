@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { randomInt, randomUUID, createHash } from 'crypto';
-import { OtpPurpose, User } from '@prisma/client';
+import { OtpPurpose } from '@prisma/client';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '@buildpipe/shared-types';
@@ -17,7 +17,10 @@ export class OtpService {
     private config: ConfigService,
   ) {}
 
-  async requestOtp(userId: string, purpose: OtpPurpose): Promise<{ message: string; devCode?: string }> {
+  async requestOtp(
+    userId: string,
+    purpose: OtpPurpose,
+  ): Promise<{ message: string; devCode?: string }> {
     const code = randomInt(100000, 999999).toString();
     const codeHash = await bcrypt.hash(code, 10);
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);

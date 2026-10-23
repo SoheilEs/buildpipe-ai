@@ -36,7 +36,7 @@ export class KubernetesFacadeService {
     return result;
   }
 
-  async listDeployments(clusterId: string, namespace: string | undefined, userId: string) {
+  async listDeployments(clusterId: string, namespace: string | undefined, _userId: string) {
     const { kubeconfig, context, k8s } = await this.getK8s(clusterId);
     return k8s.deployments.list(kubeconfig, namespace, context);
   }
@@ -78,12 +78,7 @@ export class KubernetesFacadeService {
     return { logs };
   }
 
-  async listEvents(
-    clusterId: string,
-    userId: string,
-    namespace?: string,
-    fieldSelector?: string,
-  ) {
+  async listEvents(clusterId: string, userId: string, namespace?: string, fieldSelector?: string) {
     const { kubeconfig, context, k8s } = await this.getK8s(clusterId);
     const events = await k8s.events.listEvents(kubeconfig, namespace, fieldSelector, context);
     await this.audit.log({

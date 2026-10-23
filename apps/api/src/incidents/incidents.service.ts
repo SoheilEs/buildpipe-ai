@@ -12,20 +12,10 @@ import { QueueService } from '../queue/queue.service';
 import { EventsService } from '../events/events.service';
 import { WebsocketGateway } from '../websocket/websocket.gateway';
 import { AiOrchestratorService } from '../ai/services/incident-analyzer.service';
-import {
-  AuditAction,
-  EVENT_SUBJECTS,
-} from '@buildpipe/shared-types';
+import { AuditAction, EVENT_SUBJECTS } from '@buildpipe/shared-types';
 import { randomUUID } from 'crypto';
-import {
-  AnalyzeIncidentDto,
-  CreateIncidentDto,
-  ResolveIncidentDto,
-} from './dto/incidents.dto';
-import {
-  generateIncidentSignature,
-  IncidentStateMachine,
-} from './incident-state-machine.service';
+import { AnalyzeIncidentDto, CreateIncidentDto, ResolveIncidentDto } from './dto/incidents.dto';
+import { generateIncidentSignature, IncidentStateMachine } from './incident-state-machine.service';
 
 @Injectable()
 export class IncidentsService {
@@ -153,7 +143,11 @@ export class IncidentsService {
 
     const latestAnalysis = incident.analyses[0];
     if (incident.signature && latestAnalysis) {
-      await this.upsertPattern(incident.signature, latestAnalysis.rootCause, latestAnalysis.confidence);
+      await this.upsertPattern(
+        incident.signature,
+        latestAnalysis.rootCause,
+        latestAnalysis.confidence,
+      );
     }
 
     await this.audit.log({

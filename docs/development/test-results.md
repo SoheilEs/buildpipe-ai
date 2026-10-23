@@ -59,3 +59,18 @@ Remote CI: not run (workflow arrives in M1.2).
 | Tests | `@buildpipe/api`: 3/3 suites, 7/7 tests |
 
 This is the first evidence from a clean Linux environment. Local Windows results above are no longer the only proof. Still **not** verified: Docker image builds, any real Kubernetes environment, staging.
+
+## 2026-10-23: M1.3 static checks (branch `ci/m1.3-static-checks`, local, Node v24.18.0)
+
+| Command | Result |
+|---|---|
+| `npx eslint .` (first run, before fixes) | 8 errors: 5 unused imports/args, 1 dead self-assignment (`apps/mcp-server`), 1 intentional control-char regex (`sanitize.util.ts`), 1 unused import in `seed.ts`. No logic bugs |
+| `npm run lint` after fixes | exit 0 |
+| `npx prettier --check .` (first run) | 96 files flagged. Most differed only by CRLF in the Windows working tree; git stored them as LF. `prettier --write` changed 28 files in git |
+| `npm run format:check` after formatting | exit 0 |
+| `npm run typecheck` | exit 0, 12 turbo tasks, specs included |
+| Negative test: restore the old bad spec import `'../incident-state-machine.service'` | `apps/api` typecheck **fails** with TS2307 (exit 2); passes again once restored. The gate would have caught the original M1 bug |
+| `prisma generate` after deleting `prisma/prisma.config.ts` | exit 0. Warning: `package.json#prisma` (seed config) is deprecated and removed in Prisma 7. Pre-existing |
+| `npm run build`, `npm test` after formatting | exit 0; 8/8 build tasks, 3 suites / 7 tests |
+| `actionlint v1.7.12` on the updated `ci.yml` | exit 0 (local run has no shellcheck, so shell-script checks are skipped locally) |
+| Remote GitHub run | **NOT RUN**. Unconfirmed until it runs: that the runner has Go and shellcheck preinstalled for the `Workflow lint` job |

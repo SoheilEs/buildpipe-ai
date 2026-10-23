@@ -66,9 +66,7 @@ export class ClusterHealthService {
     const version = await versionApi.getCode();
     const pods = await this.podsService.list(kubeconfig, undefined, context);
 
-    const unhealthy = pods.filter(
-      (p) => !p.ready || p.phase !== 'Running' || p.restartCount > 0,
-    );
+    const unhealthy = pods.filter((p) => !p.ready || p.phase !== 'Running' || p.restartCount > 0);
 
     return {
       connected: true,

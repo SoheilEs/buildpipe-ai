@@ -30,10 +30,7 @@ export class KubernetesController {
   @Get('deployments')
   @Roles(UserRole.viewer)
   @ApiOperation({ summary: 'List deployments' })
-  listDeployments(
-    @Param('clusterId') clusterId: string,
-    @Query('namespace') namespace?: string,
-  ) {
+  listDeployments(@Param('clusterId') clusterId: string, @Query('namespace') namespace?: string) {
     return this.k8sService.listDeployments(clusterId, namespace, '');
   }
 
@@ -91,13 +88,7 @@ export class KubernetesController {
     @CurrentUser() user: User,
     @Body() dto: RestartDeploymentDto,
   ) {
-    return this.k8sService.restartDeployment(
-      clusterId,
-      user.id,
-      dto.namespace,
-      dto.name,
-      dto.otp,
-    );
+    return this.k8sService.restartDeployment(clusterId, user.id, dto.namespace, dto.name, dto.otp);
   }
 
   @Get('health')

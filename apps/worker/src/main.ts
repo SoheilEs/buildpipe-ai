@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { Worker, Job, Queue, ConnectionOptions } from 'bullmq';
-import IORedis, { RedisOptions } from 'ioredis';
+import { RedisOptions } from 'ioredis';
 import { PrismaClient, IncidentStatus } from '@prisma/client';
 import { QueueJobName, QueueName, EVENT_SUBJECTS } from '@buildpipe/shared-types';
 import { connect, StringCodec } from 'nats';
@@ -127,11 +127,14 @@ async function main() {
   console.log('BuildPipe AI Worker started');
   await setupNatsSubscriber();
 
-  setInterval(() => {
-    void healthProducer.add(QueueJobName.CLUSTER_HEALTH_SCAN, {
-      triggeredAt: new Date().toISOString(),
-    });
-  }, 5 * 60 * 1000);
+  setInterval(
+    () => {
+      void healthProducer.add(QueueJobName.CLUSTER_HEALTH_SCAN, {
+        triggeredAt: new Date().toISOString(),
+      });
+    },
+    5 * 60 * 1000,
+  );
 }
 
 main().catch(console.error);

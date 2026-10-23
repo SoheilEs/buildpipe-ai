@@ -25,7 +25,10 @@ export class AiEngineService {
       confidence: Math.min(context.topEventScore || 0.5, 0.85),
       evidence: [
         ...context.events.slice(0, 3).map((e) => `[${e.reason}] ${e.message}`),
-        ...context.logs.filter((l) => l.level === 'error').slice(0, 3).map((l) => l.message),
+        ...context.logs
+          .filter((l) => l.level === 'error')
+          .slice(0, 3)
+          .map((l) => l.message),
       ],
       recommendations: [
         'Review pod events and container restart counts',
