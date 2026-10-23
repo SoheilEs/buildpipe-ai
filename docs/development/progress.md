@@ -7,8 +7,8 @@ IMPLEMENTED means the code exists. VERIFIED means tests or CI evidence are recor
 |---|---|---|---|---|---|
 | 0 | Repository audit + gap analysis | VERIFIED | n/a | [audit.md](audit.md) | — |
 | 0 | Implementation plan | IMPLEMENTED | n/a | [implementation-plan.md](implementation-plan.md) | — |
-| M1.1 | Make main build: lockfile, packageManager, Node pin, spec fix | IMPLEMENTED | local build 8/8, tests 7/7 ([results](test-results.md)) | this file, implementation-log | Pushed on `ci/m1.1-buildable-main` (7871886). Docker build unverified |
-| M1.2 | Minimal `ci.yml` | IMPLEMENTED | actionlint clean; steps pass locally. **Not yet run on GitHub** | [github-actions.md](../ci-cd/github-actions.md) | Needs a PR to `main` to trigger the first run |
+| M1.1 | Make main build: lockfile, packageManager, Node pin, spec fix | VERIFIED (CI) | CI run 39938152396 green: build 8/8, tests 7/7 ([results](test-results.md)) | this file, implementation-log | Docker build unverified (daemon not running locally) |
+| M1.2 | Minimal `ci.yml` | VERIFIED (CI) | actionlint clean; PR run 39938152396 green | [github-actions.md](../ci-cd/github-actions.md) | PR #1 awaiting owner merge; required check not yet enforced (B3) |
 | M1.3 | ESLint + Prettier + typecheck jobs | NOT_STARTED | — | — | M1.2 |
 | M1.4 | e2e harness + API smoke | NOT_STARTED | — | — | M1.2 |
 | M1.5 | Migration validation job | NOT_STARTED | — | — | M3 |
@@ -29,4 +29,4 @@ IMPLEMENTED means the code exists. VERIFIED means tests or CI evidence are recor
 
 ## Resume point
 
-Next action: owner reviews the M1.2 diff. After commit and push, open a PR `ci/m1.1-buildable-main` → `main` so CI runs on GitHub for the first time. Mark M1.1/M1.2 VERIFIED only after that run is green. Then **M1.3**.
+Next action: owner merges PR #1 and enables the required check "CI / Build and test" (B3). Then **M1.3** (remove corrupt `prisma/prisma.config.ts`, ESLint, Prettier, typecheck, actionlint job).
