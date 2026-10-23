@@ -28,7 +28,8 @@ export class AuthService {
       data: {
         email: dto.email,
         passwordHash,
-        role: dto.role ?? UserRole.viewer,
+        // Public self-registration never chooses a role; admins promote users via PATCH /users/:id.
+        role: UserRole.viewer,
       },
     });
 

@@ -39,7 +39,7 @@ Sources: [Mezmo AI SRE tools](https://www.mezmo.com/learn/best-ai-sre-tools-0003
 |---|---|---|---|
 | M0 | Audit + plan | `audit.md`, this file, progress, blockers | ✅ this session |
 | **M1** | **CI foundation (step by step with the owner)** | See §4 | `ci.yml` green on GitHub on a PR |
-| M2 | Security hardening P0 | Fixes **S11 first (critical, unauthenticated admin self-registration)**, then S1–S5, S9, S10, with regression tests. S11 already has a pinned failing e2e test (`it.failing`) that must flip | Tests prove each fix |
+| M2 | Security hardening P0 | **S11 (critical) is already fixed in M1.4.** Remaining: S1–S5, S9, S10, with regression tests | Tests prove each fix |
 | M3 | Postgres + migrations + tenancy | ADR-0002, `Organization`/`Membership`, scoped repositories, cross-tenant tests | Migration validated in CI against a Postgres service container |
 | M4 | Container hardening + security workflow | Non-root slim images, healthchecks, Trivy/gitleaks/osv/zizmor | `security.yml` green |
 | M5 | Build & publish to GHCR | `build-publish.yml`, digests, SBOM, provenance | Image pushed from `main` |

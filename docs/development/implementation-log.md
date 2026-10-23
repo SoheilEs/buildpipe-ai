@@ -73,3 +73,9 @@
 - **Finding S11 (critical):** discovered while writing the validation tests. `POST /auth/register` is public and honours `role: "admin"`. Documented in the audit and pinned with a failing-by-design test. **Not fixed in M1.4** (scope); recommended as the first item of M2.
 - **Known limits:** infrastructure is stubbed, so this does not test persistence, queues, NATS or Kubernetes.
 - **Next:** review, commit, push, PR, first remote run.
+
+### S11 fix (M1.4 branch)
+
+- `RegisterDto` no longer has `role`; `register` always creates a `viewer`. The global `forbidNonWhitelisted` pipe turns a payload containing `role` into a 400, which is deliberate: callers learn the field is not accepted instead of silently getting a lower role.
+- The pinned `it.failing` test is replaced by regression tests. Verified they fail against the old code.
+- **Not addressed (still in M2):** no rate limit or email verification on `/auth/register`, and the first admin must come from seeding. Existing deployments built from earlier code may already contain attacker-created admin users and should be reviewed.

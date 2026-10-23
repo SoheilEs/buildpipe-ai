@@ -79,6 +79,6 @@ Require all three checks on `main`: `Build and test`, `Static checks`, `Workflow
 - Boots the **real `AppModule`** and the same HTTP setup as production (`configureApp()` in `apps/api/src/app.setup.ts`: helmet, validation pipe, Swagger), then drives it with Supertest.
 - **Stubbed:** Prisma, the BullMQ queue service and NATS events, so no database, Redis or NATS is needed in CI. `@kubernetes/client-node` is replaced by an empty module because v1 is ESM-only and Jest runs CommonJS.
 - **Covers:** `/health`, security headers, the OpenAPI document, 401 for anonymous/malformed/forged/deleted-user tokens on protected routes (including the MCP bridge), 403 role checks (viewer/operator vs admin), request validation (empty body, unknown properties).
-- **Pinned defect:** the `S11` test uses `it.failing` and passes while public self-registration as `admin` is possible. When S11 is fixed it turns red; remove `.failing` then.
+- **Regression guard (S11):** registration tests assert that a payload with `role` is rejected (400, no user created) and that a new account is a `viewer` who is denied admin routes.
 - **Not covered:** real database behaviour, Redis/BullMQ, NATS, Kubernetes. Those need the integration suites planned for M3 and later.
 - Test-only environment values live in `apps/api/test/setup-env.ts` (`NODE_ENV=production` to avoid the pino-pretty worker, `LOG_LEVEL=silent`, throwaway secrets).

@@ -191,11 +191,11 @@ describe('API smoke (e2e)', () => {
     });
   });
 
-  describe('known security defects (tracked in docs/development/audit.md)', () => {
-    // S11: POST /auth/register is public and persists the caller-supplied role, so anyone can
-    // create an admin account. `it.failing` passes while the defect exists and turns red once
-    // it is fixed, at which point `.failing` must be removed.
-    it.failing('S11: public registration must not let the caller choose a role', async () => {
+  describe('public registration (S11: no self-assigned roles)', () => {
+    const register = (body: Record<string, unknown>) =>
+      request(app.getHttpServer()).post('/auth/register').send(body);
+
+    beforeEach(() => {
       prismaStub.user.findUnique.mockResolvedValue(null);
       prismaStub.user.create.mockImplementation(
         async ({ data }: { data: Record<string, unknown> }) => ({
@@ -207,13 +207,39 @@ describe('API smoke (e2e)', () => {
       );
       prismaStub.refreshToken.create.mockResolvedValue({});
       prismaStub.auditLog.create.mockResolvedValue({});
+    });
+
+    it.each(['admin', 'operator', 'viewer'])(
+      'rejects a request that supplies role=%s and creates no user',
+      async (role) => {
+        await register({ email: 'attacker@test.local', password: 'Password123!', role }).expect(
+          400,
+        );
+        expect(prismaStub.user.create).not.toHaveBeenCalled();
+      },
+    );
+
+    it('creates a viewer when no role is supplied', async () => {
+      const res = await register({ email: 'new@test.local', password: 'Password123!' }).expect(201);
+
+      expect(prismaStub.user.create).toHaveBeenCalledTimes(1);
+      expect(prismaStub.user.create.mock.calls[0][0].data.role).toBe('viewer');
+      expect(res.body.user.role).toBe('viewer');
+    });
+
+    it('does not let a freshly registered user reach admin routes', async () => {
+      const res = await register({ email: 'new@test.local', password: 'Password123!' }).expect(201);
+      prismaStub.user.findFirst.mockResolvedValue({
+        id: 'u-new',
+        email: 'new@test.local',
+        role: 'viewer',
+        deletedAt: null,
+      });
 
       await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({ email: 'attacker@test.local', password: 'Password123!', role: 'admin' });
-
-      const created = prismaStub.user.create.mock.calls[0]?.[0]?.data;
-      expect(created.role).toBe('viewer');
+        .get('/audit/logs')
+        .set('Authorization', `Bearer ${res.body.accessToken}`)
+        .expect(403);
     });
   });
 });

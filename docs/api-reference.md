@@ -35,7 +35,7 @@ Send OTP via POST /auth/otp/request, then include code in:
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| POST | /auth/register | Public | Register local account |
+| POST | /auth/register | Public | Register local account. Always creates a `viewer`; a `role` field is rejected with 400 |
 | POST | /auth/login | Public | Login (5 req/min throttle) |
 | POST | /auth/refresh | Public | Rotate refresh token |
 | POST | /auth/logout | JWT | Revoke refresh token |

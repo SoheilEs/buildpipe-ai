@@ -86,3 +86,13 @@ This is the first evidence from a clean Linux environment. Local Windows results
 | `npm run build`, `typecheck` (now also covers `test/`), `npm test`, `lint`, `format:check` | all exit 0; unit tests still 3 suites / 7 tests; `apps/api/dist/main.js` present, no e2e files in `dist` |
 | `actionlint v1.7.12` on updated `ci.yml` | exit 0 |
 | Remote GitHub run | **NOT RUN** (no PR yet) |
+
+### M1.4 follow-up: S11 fix (same branch, local)
+
+| Item | Result |
+|---|---|
+| Fix | `role` removed from `RegisterDto`; `AuthService.register` always stores `viewer`. Other role paths checked: `PATCH /users/:id` is admin-only; OAuth sign-up creates `viewer`; `seed.ts` does not use `RegisterDto` |
+| `npm run test:e2e` | **24/24** (the pinned `it.failing` test was replaced by 5 regression tests: role=admin/operator/viewer rejected with 400 and no user created; role-less registration creates a viewer; a freshly registered token gets 403 on `/audit/logs`) |
+| Mutation check: temporarily restore the old `auth.service.ts` / `auth.dto.ts` | the three "rejects role=…" tests **fail**, 21 pass; fix restored afterwards |
+| Final full run: build, typecheck, unit (3 suites / 7 tests), e2e (24), lint, prettier | all exit 0 |
+| Behaviour change | clients that sent `role` on register now receive 400 instead of an account with that role. No client in this repo does |
