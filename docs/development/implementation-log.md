@@ -86,3 +86,11 @@
 - `RegisterDto` no longer has `role`; `register` always creates a `viewer`. The global `forbidNonWhitelisted` pipe turns a payload containing `role` into a 400, which is deliberate: callers learn the field is not accepted instead of silently getting a lower role.
 - The pinned `it.failing` test is replaced by regression tests. Verified they fail against the old code.
 - **Not addressed (still in M2):** no rate limit or email verification on `/auth/register`, and the first admin must come from seeding. Existing deployments built from earlier code may already contain attacker-created admin users and should be reviewed.
+
+## 2026-10-23: M1.4 verified and merged
+
+- PR #4 merged as `8ce6f0a` after all three checks passed on `5b64096`; the post-merge run on `main` also passed (evidence in [test-results.md](test-results.md)).
+- The merge conflict with PR #3 was in the three append-only tracking docs and was resolved by keeping both sides (main's M1.3 entries first, then M1.4).
+- **S11 is fixed on `main`.** Deployments built from earlier code should still be reviewed for attacker-created admin users.
+- **Open:** B3. `GET /repos/SoheilEs/buildpipe-ai/rulesets` still returns none. M1 steps 1.5 (migration validation, needs Postgres in M3), 1.6 (Docker build check, needs M4) and 1.7 (branch protection) remain.
+- **Next:** owner creates the ruleset; then M2 (S1–S5, S9, S10).
