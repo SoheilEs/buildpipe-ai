@@ -21,10 +21,15 @@ import { McpModule } from './mcp/mcp.module';
 import { MetricsModule } from './metrics/metrics.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
+import { validateEnv } from './config/env.validation';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '../../.env'] }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env', '../../.env'],
+      validate: validateEnv,
+    }),
     LoggerModule.forRoot({
       pinoHttp: {
         level: process.env.LOG_LEVEL ?? 'info',

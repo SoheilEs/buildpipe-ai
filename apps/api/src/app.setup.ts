@@ -1,6 +1,7 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
+import { corsOriginHandler } from './common/cors';
 
 /**
  * HTTP-level configuration shared by the real server (main.ts) and the e2e tests,
@@ -8,7 +9,7 @@ import helmet from 'helmet';
  */
 export function configureApp(app: INestApplication): void {
   app.use(helmet());
-  app.enableCors({ origin: process.env.CORS_ORIGIN ?? '*' });
+  app.enableCors({ origin: corsOriginHandler() });
 
   app.useGlobalPipes(
     new ValidationPipe({
