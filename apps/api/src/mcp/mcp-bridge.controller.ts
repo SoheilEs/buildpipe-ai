@@ -109,13 +109,7 @@ export class McpBridgeController {
   @ApiOperation({ summary: 'MCP: restart deployment (OTP required)' })
   async restartDeployment(@CurrentUser() user: User, @Body() dto: McpToolDto) {
     await this.logMcp(user.id, 'restart_deployment', dto);
-    return this.k8s.restartDeployment(
-      dto.clusterId,
-      user.id,
-      dto.namespace!,
-      dto.deploymentName!,
-      dto.otp!,
-    );
+    return this.k8s.restartDeployment(dto.clusterId, user.id, dto.namespace!, dto.deploymentName!);
   }
 
   private async logMcp(userId: string, tool: string, dto: McpToolDto) {
@@ -123,7 +117,15 @@ export class McpBridgeController {
       userId,
       action: AuditAction.MCP_TOOL_EXECUTED,
       resource: 'mcp_tool',
-      metadata: { tool, ...dto },
+      // Allowlist, never spread the DTO: it carries the OTP code and free-form params.
+      metadata: {
+        tool,
+        clusterId: dto.clusterId,
+        namespace: dto.namespace,
+        podName: dto.podName,
+        deploymentName: dto.deploymentName,
+        incidentId: dto.incidentId,
+      },
     });
   }
 }
