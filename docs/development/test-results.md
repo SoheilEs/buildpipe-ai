@@ -98,7 +98,7 @@ Still not verified: Docker image builds, a real Kubernetes environment, staging.
 | Negative test B: temporarily make `JwtAuthGuard` always allow | **11 of 20 tests fail** (all anonymous-denial tests plus "viewer can read clusters" shape check). Guard restored; `git diff` empty |
 | `npm run build`, `typecheck` (now also covers `test/`), `npm test`, `lint`, `format:check` | all exit 0; unit tests still 3 suites / 7 tests; `apps/api/dist/main.js` present, no e2e files in `dist` |
 | `actionlint v1.7.12` on updated `ci.yml` | exit 0 |
-| Remote GitHub run | **NOT RUN** (no PR yet) |
+| Remote GitHub run | see "M1.4: first remote run" below |
 
 ### M1.4 follow-up: S11 fix (same branch, local)
 
@@ -109,3 +109,17 @@ Still not verified: Docker image builds, a real Kubernetes environment, staging.
 | Mutation check: temporarily restore the old `auth.service.ts` / `auth.dto.ts` | the three "rejects role=…" tests **fail**, 21 pass; fix restored afterwards |
 | Final full run: build, typecheck, unit (3 suites / 7 tests), e2e (24), lint, prettier | all exit 0 |
 | Behaviour change | clients that sent `role` on register now receive 400 instead of an account with that role. No client in this repo does |
+
+### M1.4 (+ S11 fix): first remote run (verified in CI)
+
+| Item | Result |
+|---|---|
+| Run | [`39942238735`](https://github.com/SoheilEs/buildpipe-ai/actions/runs/39942238735), event `pull_request` (PR #4), head `5b64096` (after merging `main`) |
+| `Build and test` | success, 64 s: build 8/8, typecheck 12/12, unit 3 suites / 7 tests, **e2e 1 suite / 24 tests** |
+| `Static checks` | success, 28 s |
+| `Workflow lint` | success, 18 s |
+| Post-merge push run on `main` (`8ce6f0a`) | [`39942518838`](https://github.com/SoheilEs/buildpipe-ai/actions/runs/39942518838) success. The earlier `main` run for PR #3 (`61bc086`, run `39942112133`) also succeeded |
+
+The e2e suite passing on a clean Linux runner confirms the stubbed-infrastructure approach works without Redis, NATS or a database.
+
+Still not verified: Docker image builds, any real database, Redis/BullMQ, NATS or Kubernetes, staging. `main` has **no ruleset** (B3), so these green checks are still not enforced.

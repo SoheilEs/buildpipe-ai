@@ -70,7 +70,7 @@ actionlint runs shellcheck on `run:` blocks only when `shellcheck` is installed.
 
 ## Required checks
 
-Require all three checks on `main`: `Build and test`, `Static checks`, `Workflow lint` (Settings → Rules → Rulesets). That is M1.7, tracked as blocker B3. A check only appears in the picker after it has run once.
+Enforced since 2026-10-23 by the repository ruleset `protect-main` on the default branch: pull request required (0 approvals), branches must be up to date, and the checks `Build and test`, `Static checks` and `Workflow lint` must pass. Force pushes and deletion are blocked and there are no bypass actors. **When a job is added to `ci.yml`, its `name:` must be added to the ruleset by the repo owner** (Settings → Rules → Rulesets), or it will not gate merges.
 
 ## End-to-end smoke tests
 
