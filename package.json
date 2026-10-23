@@ -2,6 +2,7 @@
   "name": "buildpipe-ai",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "npm@11.16.0",
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "build": "turbo run build",
@@ -33,6 +34,6 @@
     "@prisma/client": "^6.1.0"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=24 <25"
   }
 }

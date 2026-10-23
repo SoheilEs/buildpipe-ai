@@ -21,3 +21,19 @@ Commit `04083b3`, clean clone. No lockfile in the repo, so dependency versions w
 3. Node version is unpinned: Docker uses 20 and this machine used 24. Pin it via `.nvmrc` and CI.
 
 Remote CI: **not run** (no workflows exist).
+
+## 2026-10-23 — M1.1 "make main build" (branch `ci/m1.1-buildable-main`, local, Windows 11, Node v24.18.0, npm 11.16.0)
+
+| Command | Result |
+|---|---|
+| `npm install` with `legacy-peer-deps` removed, fresh lockfile | exit 0, no ERESOLVE. The peer-dep override was unnecessary |
+| `rm -rf node_modules … && npm ci` (from the new lockfile) | exit 0 |
+| `npx prisma generate` | exit 0 |
+| `npm run build` (first try) | **exit 2**: `ai-sdk`/`worker` TS2307 for `@buildpipe/shared-types`. Root cause: stale `tsconfig.tsbuildinfo` outside `dist/` made `tsc` skip emitting after `dist/` was deleted. Fixed by setting `tsBuildInfoFile: dist/.tsbuildinfo` |
+| `npm run build` | exit 0, turbo **8/8 tasks** |
+| `npm test` | exit 0, `@buildpipe/api`: **3/3 suites, 7/7 tests** |
+| `rm -rf apps/*/dist packages/*/dist .turbo && npx turbo run build --force` | exit 0, 8/8 |
+| `find apps/api/dist -name '*.spec.*'` | 0 files (specs excluded from build) |
+| Docker image build | **NOT RUN**: Docker Desktop daemon not running on this machine |
+
+Remote CI: not run (workflow arrives in M1.2).

@@ -1,4 +1,4 @@
-import { generateIncidentSignature } from '../incident-state-machine.service';
+import { generateIncidentSignature } from './incident-state-machine.service';
 
 describe('generateIncidentSignature', () => {
   it('should generate consistent signatures', () => {

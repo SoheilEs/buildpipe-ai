@@ -7,7 +7,7 @@ IMPLEMENTED means the code exists. VERIFIED means tests or CI evidence are recor
 |---|---|---|---|---|---|
 | 0 | Repository audit + gap analysis | VERIFIED | n/a | [audit.md](audit.md) | — |
 | 0 | Implementation plan | IMPLEMENTED | n/a | [implementation-plan.md](implementation-plan.md) | — |
-| M1.1 | Lockfile + Node pin + root scripts | NOT_STARTED | — | — | Awaiting owner go-ahead |
+| M1.1 | Make main build: lockfile, packageManager, Node pin, spec fix | IMPLEMENTED | local build 8/8, tests 7/7 ([results](test-results.md)) | this file, implementation-log | Committed locally on `ci/m1.1-buildable-main`, not pushed. Docker build unverified |
 | M1.2 | Minimal `ci.yml` | NOT_STARTED | — | — | M1.1 |
 | M1.3 | ESLint + Prettier + typecheck jobs | NOT_STARTED | — | — | M1.2 |
 | M1.4 | e2e harness + API smoke | NOT_STARTED | — | — | M1.2 |
@@ -29,4 +29,4 @@ IMPLEMENTED means the code exists. VERIFIED means tests or CI evidence are recor
 
 ## Resume point
 
-Next action: **M1.1**. It waits on the owner's approval of the CI/CD step plan in [implementation-plan.md §4](implementation-plan.md).
+Next action: push `ci/m1.1-buildable-main` when the owner approves, then **M1.2** (minimal `ci.yml`).
