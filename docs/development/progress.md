@@ -14,7 +14,10 @@ IMPLEMENTED means the code exists. VERIFIED means tests or CI evidence are recor
 | M1.5 | Migration validation job | NOT_STARTED | — | — | M3 |
 | M1.6 | Docker build check | NOT_STARTED | — | — | M4 |
 | M1.7 | Branch protection | NOT_STARTED | — | — | B3 |
-| M2 | Security hardening S1–S5, S9, S10 (S11 fixed in M1.4) | NOT_STARTED | — | [audit.md §6](audit.md) | — |
+| M2.1 | OTP handling: single verification, no OTP in audit/logs, fail-closed dev mode (S1, S2, S3) | IMPLEMENTED | 36 e2e + 7 unit pass locally; 9 of 12 new tests fail on the old code ([results](test-results.md)) | [audit.md](audit.md), [api-reference](../api-reference.md) | Branch `security/m2.1-otp-handling`, awaiting review. B7: no OTP delivery channel |
+| M2.2 | Secrets and CORS (S4, S5) | NOT_STARTED | — | — | — |
+| M2.3 | Prompt data hygiene (S9) | NOT_STARTED | — | — | — |
+| M2.4 | LLM call limits and error handling (S10) | NOT_STARTED | — | — | — |
 | M3 | Postgres + migrations + tenancy | NOT_STARTED | — | — | — |
 | M4 | Container hardening + `security.yml` | NOT_STARTED | — | — | — |
 | M5 | GHCR build/publish | NOT_STARTED | — | — | — |
@@ -29,4 +32,4 @@ IMPLEMENTED means the code exists. VERIFIED means tests or CI evidence are recor
 
 ## Resume point
 
-Next action: owner reviews and merges PR #4 (M1.4 + the S11 fix), then creates the `protect-main` ruleset requiring `Build and test`, `Static checks`, `Workflow lint` (B3, still open: no ruleset exists). Then **M2** covers the remaining findings S1–S5, S9, S10.
+Next action: owner reviews M2.1 (branch `security/m2.1-otp-handling`, uncommitted). Decide B7 (how OTPs are delivered). Then M2.2.

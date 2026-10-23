@@ -86,3 +86,14 @@
 - `RegisterDto` no longer has `role`; `register` always creates a `viewer`. The global `forbidNonWhitelisted` pipe turns a payload containing `role` into a 400, which is deliberate: callers learn the field is not accepted instead of silently getting a lower role.
 - The pinned `it.failing` test is replaced by regression tests. Verified they fail against the old code.
 - **Not addressed (still in M2):** no rate limit or email verification on `/auth/register`, and the first admin must come from seeding. Existing deployments built from earlier code may already contain attacker-created admin users and should be reviewed.
+
+## 2026-10-23: M2.1 OTP handling (S1, S2, S3)
+
+- **Branch:** `security/m2.1-otp-handling` from `main` at `8ce6f0a`. Nothing committed yet.
+- **S1:** `OtpGuard` already consumed the code, and the services verified it again. That broke `POST /clusters`, `PATCH /clusters/:id` and MCP `restart_deployment` (found while reading, beyond the audit's original MCP-only description). Decision: the guard, declared on the route with `@RequireOtp(purpose)`, is the single verification point. Services no longer take or check an OTP. The REST restart route, which only had a service-level check, now has the guard too. Error statuses are now 400 (missing) / 401 (wrong, expired, reused) instead of 404 or 500.
+- **S2:** the MCP audit record was built by spreading the whole request, OTP included. It is now an allowlist (`tool`, `clusterId`, `namespace`, `podName`, `deploymentName`, `incidentId`).
+- **S3:** the code was logged at info level and returned whenever `NODE_ENV !== 'production'`. Now both happen only when `OTP_DEV_MODE` is exactly `true` (default false), independent of `NODE_ENV`. The misleading message "OTP sent to registered email" is gone.
+- **Also:** `purpose` in the OTP DTOs is now validated as an `OtpPurpose` enum; an unknown value used to reach Prisma and return 500.
+- **Consequence to decide (B7):** there is no OTP delivery channel, so with the flag off an OTP is issued but nobody can read it. Before this change the code leaked through logs, which is how it was "delivered". Production-grade options: SMTP email, TOTP authenticator app, or approvals in the app UI.
+- **New finding S12:** remaining OTP weaknesses (no attempt limit, verify endpoint burns the code, code spent before body validation, not bound to the exact action). Phase 2's action-hash approvals supersede most of it.
+- **Next:** owner review; then M2.2 (S4, S5).

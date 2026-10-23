@@ -87,7 +87,8 @@ Models used:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| OTP_EMAIL_FROM | noreply@buildpipe.ai | Sender address (email delivery stubbed; OTP logged in dev) |
+| OTP_EMAIL_FROM | noreply@buildpipe.ai | Sender address (reserved; no email delivery exists yet) |
+| OTP_DEV_MODE | false | Only the exact value `true` makes `POST /auth/otp/request` return the code (`devCode`) and log it. Anything else keeps the code secret. Local development only |
 
 In non-production, OTP code is returned in API response as `devCode`.
 

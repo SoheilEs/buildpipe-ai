@@ -109,3 +109,14 @@ Still not verified: Docker image builds, a real Kubernetes environment, staging.
 | Mutation check: temporarily restore the old `auth.service.ts` / `auth.dto.ts` | the three "rejects role=…" tests **fail**, 21 pass; fix restored afterwards |
 | Final full run: build, typecheck, unit (3 suites / 7 tests), e2e (24), lint, prettier | all exit 0 |
 | Behaviour change | clients that sent `role` on register now receive 400 instead of an account with that role. No client in this repo does |
+
+## 2026-10-23: M2.1 OTP handling (branch `security/m2.1-otp-handling`, local, Node v24.18.0)
+
+| Item | Result |
+|---|---|
+| New suite `apps/api/test/otp.e2e-spec.ts` | 12 tests, stateful OTP stub (a consumed challenge cannot be verified again) |
+| Mutation check: run the suite against the pre-fix `apps/api/src` | **9 failed, 3 passed**. Failing: POST /clusters (valid OTP), reuse of a consumed OTP, PATCH /clusters/:id, REST restart (wrong OTP returned 500), MCP restart (500), audit metadata, default non-disclosure of the code, dev flag, unknown purpose. The 3 passing ones were already correct on the old code (wrong OTP gives 401 on cluster create, REST restart with a valid OTP, `NODE_ENV=production` hid `devCode`) |
+| Fix restored; full run | build 8/8, typecheck, unit 3 suites / 7 tests, **e2e 2 suites / 36 tests**, lint, format: all exit 0 |
+| Remote GitHub run | **NOT RUN** (nothing committed or pushed yet) |
+
+Limits: Kubernetes is faked at the `ClustersService` seam, so a real cluster restart is untested. The OTP table is an in-memory stub, not a real database.
