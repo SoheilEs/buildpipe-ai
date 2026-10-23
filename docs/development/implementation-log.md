@@ -41,3 +41,9 @@
 - **Finding (queued for M1.3):** `prisma/prisma.config.ts` is mojibake. It decodes to a byte-swapped JSON fragment `{"schema": "prisma/schema.prisma"}`, not TypeScript. Prisma ignores it (it only auto-loads `prisma.config.ts` from the project root), but Prettier/ESLint in M1.3 would fail on it. Plan: delete it, since the schema is already at Prisma's default path. `infrastructure/scripts/fix-encoding.ps1` is the likely origin and gets reviewed then too.
 - **Tests:** [test-results.md](test-results.md) (M1.2 section). Not yet run remotely.
 - **Next:** commit, push, open the PR → first remote run → M1.3.
+
+## 2026-10-23: First remote CI run
+
+- PR #1 run `39938152396` passed (build 8/8, tests 7/7) on a clean `ubuntu-24.04` runner. M1.1 and M1.2 are therefore VERIFIED in CI. Evidence is in [test-results.md](test-results.md).
+- Auto-fix monitoring is enabled for PR #1.
+- **Next:** owner merges PR #1 and sets the required check; then M1.3.

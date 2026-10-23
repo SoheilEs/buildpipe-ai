@@ -47,3 +47,15 @@ Remote CI: not run (workflow arrives in M1.2).
 | `go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 .github/workflows/ci.yml` | exit 0, no findings (shellcheck not installed, so the shell-script pass was skipped) |
 | Workflow steps run locally: `npx --no-install prisma generate && npm run build && npm test` | exit 0. Build 8/8, tests 3/3 suites, 7/7 tests. `npm ci` was not re-run (lockfile unchanged since M1.1, where it passed) |
 | Remote GitHub Actions run | **NOT RUN**. The workflow triggers on PRs to `main`, and no PR exists yet |
+
+### M1.1 + M1.2: first remote run (verified in CI)
+
+| Item | Result |
+|---|---|
+| Run | [`39938152396`](https://github.com/SoheilEs/buildpipe-ai/actions/runs/39938152396), event `pull_request` (PR #1), commit `8e61e8f`, **success**, about 54 s |
+| Runner toolchain | Node v24.21.0, npm 11.19.0 (newer than `packageManager` npm@11.16.0; npm does not enforce that field) |
+| Steps | checkout, setup-node, toolchain versions, `npm ci`, `prisma generate`, build, test: all success |
+| Build | turbo 8/8 tasks |
+| Tests | `@buildpipe/api`: 3/3 suites, 7/7 tests |
+
+This is the first evidence from a clean Linux environment. Local Windows results above are no longer the only proof. Still **not** verified: Docker image builds, any real Kubernetes environment, staging.
