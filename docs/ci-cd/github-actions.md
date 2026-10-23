@@ -16,7 +16,7 @@ Each job is its own check on the PR. The check name is the job `name:`, with no 
 |---|---|---|---|
 | `Build and test` | `build-test` | `npm ci`, `prisma generate`, build, **typecheck**, unit tests, **e2e smoke tests** | Any step fails. Typecheck also covers `*.spec.ts`, which the build skips |
 | `Static checks` | `static-checks` | `npm ci`, ESLint (`npm run lint`), Prettier (`npm run format:check`) | A lint error or an unformatted file |
-| `Workflow lint` | `workflow-lint` | actionlint v1.7.12 (`go run …@v1.7.12`; Go and shellcheck come with the runner image) | A workflow syntax, expression or shell-script problem |
+| `Workflow lint` | `workflow-lint` | actionlint v1.7.12 (`go run …@v1.7.12`; Go is preinstalled on the runner image (confirmed); shellcheck availability is not yet confirmed from the logs) | A workflow syntax, expression or shell-script problem |
 
 ### `build-test` in detail
 
