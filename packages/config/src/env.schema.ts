@@ -34,7 +34,7 @@ export const envSchema = z.object({
   GOOGLE_CALLBACK_URL: z.string().optional(),
 
   OTP_EMAIL_FROM: z.string().default('noreply@buildpipe.ai'),
-  CORS_ORIGIN: z.string().default('*'),
+  CORS_ORIGIN: z.string().default(''), // empty = no cross-origin access
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

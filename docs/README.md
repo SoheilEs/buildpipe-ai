@@ -24,6 +24,6 @@ BuildPipe AI is an AI-powered Kubernetes incident intelligence platform for regi
 | Metrics | http://localhost:3000/metrics |
 | AI Engine | http://localhost:3001 |
 
-Default admin: admin@buildpipe.ai / Admin123!
+There is no default admin: set ADMIN_EMAIL and ADMIN_PASSWORD in .env (see .env.example).
 
 Repository: https://github.com/SoheilEs/buildpipe-ai

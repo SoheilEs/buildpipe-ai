@@ -8,9 +8,10 @@ import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Server, Socket } from 'socket.io';
+import { corsOriginHandler } from '../common/cors';
 
 @WebSocketGateway({
-  cors: { origin: '*' },
+  cors: { origin: corsOriginHandler() },
   namespace: '/ws',
 })
 export class WebsocketGateway implements OnGatewayConnection, OnGatewayDisconnect {

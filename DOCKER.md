@@ -35,4 +35,4 @@ docker compose up -d
 | Swagger | http://localhost:3000/api/docs |
 | AI Engine | http://localhost:3001 |
 
-Default admin: `admin@buildpipe.ai` / `Admin123!`
+There is no default admin account. Copy `.env.example` to `.env`, generate the three secrets (`openssl rand -base64 48`) and set `ADMIN_EMAIL` / `ADMIN_PASSWORD` (12+ characters). The API refuses to start with placeholder or published secrets.

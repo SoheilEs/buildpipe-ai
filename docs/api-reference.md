@@ -51,8 +51,8 @@ Send OTP via POST /auth/otp/request, then include code in:
 ```json
 POST /auth/login
 {
-  "email": "admin@buildpipe.ai",
-  "password": "Admin123!"
+  "email": "admin@example.com",
+  "password": "your-password"
 }
 
 Response:
