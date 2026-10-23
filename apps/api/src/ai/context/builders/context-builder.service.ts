@@ -53,7 +53,10 @@ export class ContextBuilderService {
     };
   }
 
-  withLogs(context: IncidentContext, logs: Array<{ level: string; message: string; count?: number }>): IncidentContext {
+  withLogs(
+    context: IncidentContext,
+    logs: Array<{ level: string; message: string; count?: number }>,
+  ): IncidentContext {
     return { ...context, logs };
   }
 }

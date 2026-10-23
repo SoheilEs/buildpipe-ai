@@ -10,7 +10,10 @@ const NOISE_PATTERNS = [
 
 @Injectable()
 export class LogReducerService {
-  reduce(rawLogs: string, maxChars = 8000): Array<{ level: string; message: string; count: number }> {
+  reduce(
+    rawLogs: string,
+    maxChars = 8000,
+  ): Array<{ level: string; message: string; count: number }> {
     const lines = rawLogs.split('\n').filter((line) => !this.isNoise(line));
     const grouped = new Map<string, { level: string; message: string; count: number }>();
 

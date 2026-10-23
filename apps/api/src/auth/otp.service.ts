@@ -17,7 +17,10 @@ export class OtpService {
     private config: ConfigService,
   ) {}
 
-  async requestOtp(userId: string, purpose: OtpPurpose): Promise<{ message: string; devCode?: string }> {
+  async requestOtp(
+    userId: string,
+    purpose: OtpPurpose,
+  ): Promise<{ message: string; devCode?: string }> {
     const code = randomInt(100000, 999999).toString();
     const codeHash = await bcrypt.hash(code, 10);
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);

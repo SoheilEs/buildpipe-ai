@@ -78,12 +78,7 @@ export class KubernetesFacadeService {
     return { logs };
   }
 
-  async listEvents(
-    clusterId: string,
-    userId: string,
-    namespace?: string,
-    fieldSelector?: string,
-  ) {
+  async listEvents(clusterId: string, userId: string, namespace?: string, fieldSelector?: string) {
     const { kubeconfig, context, k8s } = await this.getK8s(clusterId);
     const events = await k8s.events.listEvents(kubeconfig, namespace, fieldSelector, context);
     await this.audit.log({

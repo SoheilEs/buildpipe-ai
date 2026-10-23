@@ -34,7 +34,8 @@ export class OtpGuard implements CanActivate {
     const otpCode = request.headers['x-otp-code'] || request.body?.otp;
     if (!otpCode) throw new BadRequestException('OTP code required for this action');
 
-    const purpose = typeof otpMeta === 'string' ? (otpMeta as OtpPurpose) : OtpPurpose.mcp_sensitive;
+    const purpose =
+      typeof otpMeta === 'string' ? (otpMeta as OtpPurpose) : OtpPurpose.mcp_sensitive;
     const valid = await this.otpService.verifyOtp(request.user.id, otpCode, purpose);
     if (!valid) throw new UnauthorizedException('Invalid or expired OTP');
 

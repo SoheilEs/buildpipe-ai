@@ -67,9 +67,7 @@ export class ClustersService {
       data: {
         name: dto.name,
         context: dto.context,
-        ...(dto.kubeconfig
-          ? { encryptedKubeconfig: this.encryption.encrypt(dto.kubeconfig) }
-          : {}),
+        ...(dto.kubeconfig ? { encryptedKubeconfig: this.encryption.encrypt(dto.kubeconfig) } : {}),
       },
     });
 

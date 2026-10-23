@@ -1,5 +1,9 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { AiOrchestratorService, ContextEngineService, IncidentAnalyzerService } from './services/incident-analyzer.service';
+import {
+  AiOrchestratorService,
+  ContextEngineService,
+  IncidentAnalyzerService,
+} from './services/incident-analyzer.service';
 import { ContextBuilderService } from './context/builders/context-builder.service';
 import { ContextNormalizerService } from './context/normalizers/context-normalizer.service';
 import { LogReducerService } from './context/reducers/log-reducer.service';
@@ -11,11 +15,7 @@ import { AuditModule } from '../audit/audit.module';
 import { IncidentsModule } from '../incidents/incidents.module';
 
 @Module({
-  imports: [
-    ClustersModule,
-    AuditModule,
-    forwardRef(() => IncidentsModule),
-  ],
+  imports: [ClustersModule, AuditModule, forwardRef(() => IncidentsModule)],
   providers: [
     ContextBuilderService,
     ContextNormalizerService,

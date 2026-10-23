@@ -127,11 +127,14 @@ async function main() {
   console.log('BuildPipe AI Worker started');
   await setupNatsSubscriber();
 
-  setInterval(() => {
-    void healthProducer.add(QueueJobName.CLUSTER_HEALTH_SCAN, {
-      triggeredAt: new Date().toISOString(),
-    });
-  }, 5 * 60 * 1000);
+  setInterval(
+    () => {
+      void healthProducer.add(QueueJobName.CLUSTER_HEALTH_SCAN, {
+        triggeredAt: new Date().toISOString(),
+      });
+    },
+    5 * 60 * 1000,
+  );
 }
 
 main().catch(console.error);
