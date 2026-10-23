@@ -25,9 +25,9 @@ DATABASE_URL=file:./data/buildpipe.db
 REDIS_HOST=localhost
 REDIS_PORT=6379
 NATS_URL=nats://localhost:4222
-JWT_SECRET=local-dev-jwt-secret-min-32-chars!!
-JWT_REFRESH_SECRET=local-dev-refresh-secret-32-chars!
-ENCRYPTION_KEY=local-dev-encryption-key-32bytes!
+JWT_SECRET=<openssl rand -base64 48>
+JWT_REFRESH_SECRET=<openssl rand -base64 48>
+ENCRYPTION_KEY=<openssl rand -base64 48>
 ```
 
 Create data directory:
@@ -52,7 +52,7 @@ npm run db:seed      # Create admin user
 npm run db:generate  # Regenerate Prisma client
 ```
 
-Admin credentials after seed: admin@buildpipe.ai / Admin123!
+Set ADMIN_EMAIL and ADMIN_PASSWORD (12+ characters) in .env before seeding; there is no default admin.
 
 ## Running Infrastructure (Redis + NATS)
 

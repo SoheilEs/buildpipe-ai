@@ -15,6 +15,7 @@ IMPLEMENTED means the code exists. VERIFIED means tests or CI evidence are recor
 | M1.6 | Docker build check | NOT_STARTED | — | — | M4 |
 | M1.7 | Branch protection | NOT_STARTED | — | — | B3 |
 | M2 | Security hardening S1–S5, S9, S10 (S11 fixed in M1.4) | NOT_STARTED | — | [audit.md §6](audit.md) | — |
+| M2.2 | Secrets, default admin and CORS (S4, S5, S13) | IMPLEMENTED | 40 unit + 31 e2e pass locally; real-process boot refusals 12/12; seed run through 5 scenarios ([results](test-results.md)) | [audit.md](audit.md), [configuration](../configuration.md), [deployment](../deployment.md) | Branch `security/m2.2-secrets-cors`, awaiting review. Breaking for existing deployments, see the upgrade notes in deployment.md |
 | M3 | Postgres + migrations + tenancy | NOT_STARTED | — | — | — |
 | M4 | Container hardening + `security.yml` | NOT_STARTED | — | — | — |
 | M5 | GHCR build/publish | NOT_STARTED | — | — | — |
