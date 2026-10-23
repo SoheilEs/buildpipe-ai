@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { OtpPurpose, User } from '@prisma/client';
+import { User } from '@prisma/client';
 import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { OtpService } from './otp.service';
@@ -64,7 +64,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Request OTP for sensitive action' })
   requestOtp(@CurrentUser() user: User, @Body() dto: RequestOtpDto) {
-    return this.otpService.requestOtp(user.id, dto.purpose as OtpPurpose);
+    return this.otpService.requestOtp(user.id, dto.purpose);
   }
 
   @Post('otp/verify')
@@ -72,7 +72,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Verify OTP code' })
   async verifyOtp(@CurrentUser() user: User, @Body() dto: VerifyOtpDto) {
-    const valid = await this.otpService.verifyOtp(user.id, dto.code, dto.purpose as OtpPurpose);
+    const valid = await this.otpService.verifyOtp(user.id, dto.code, dto.purpose);
     return { valid };
   }
 
