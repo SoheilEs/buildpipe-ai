@@ -37,3 +37,13 @@ Remote CI: **not run** (no workflows exist).
 | Docker image build | **NOT RUN**: Docker Desktop daemon not running on this machine |
 
 Remote CI: not run (workflow arrives in M1.2).
+
+## 2026-10-23 — M1.2 minimal `ci.yml` (local validation only)
+
+| Command | Result |
+|---|---|
+| YAML parse (`js-yaml`) + pin check (every `uses:` is a 40-char SHA) | pass, 2 actions pinned |
+| `gh api repos/actions/{checkout,setup-node}/commits/<tag>` vs pinned SHAs | both match (`v7.0.1`, `v7.1.0`) |
+| `go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 .github/workflows/ci.yml` | exit 0, no findings (shellcheck not installed, so the shell-script pass was skipped) |
+| Workflow steps run locally: `npx --no-install prisma generate && npm run build && npm test` | exit 0. Build 8/8, tests 3/3 suites, 7/7 tests. `npm ci` was not re-run (lockfile unchanged since M1.1, where it passed) |
+| Remote GitHub Actions run | **NOT RUN**. The workflow triggers on PRs to `main`, and no PR exists yet |

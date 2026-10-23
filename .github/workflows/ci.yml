@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least privilege: jobs only read the repository. Grant more per job if ever needed.
+permissions:
+  contents: read
+
+# One run per PR/branch; superseded PR runs are cancelled, main runs always finish.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  TURBO_TELEMETRY_DISABLED: '1'
+  CHECKPOINT_DISABLE: '1' # Prisma telemetry/update check
+
+jobs:
+  build-test:
+    name: Build and test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      # Third-party actions are pinned to full commit SHAs; the comment names the release.
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node (version from .nvmrc)
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Toolchain versions
+        run: |
+          node --version
+          npm --version
+
+      - name: Install dependencies (lockfile only)
+        run: npm ci --no-audit --no-fund
+
+      - name: Generate Prisma client
+        run: npx --no-install prisma generate
+
+      - name: Build all workspaces
+        run: npm run build
+
+      - name: Unit tests
+        run: npm test

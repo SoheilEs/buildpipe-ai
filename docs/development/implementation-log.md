@@ -28,3 +28,16 @@
   - npm 11.16 warns that 8 packages run install scripts not covered by `allowScripts`. They still run today. Recording an explicit allowlist (allow prisma/bcrypt/esbuild/msgpackr; deny the `@nestjs/core` opencollective and `@scarf/scarf` telemetry hooks) is queued for M4.
 - **Tests:** see [test-results.md](test-results.md) (M1.1 section).
 - **Next:** M1.2 minimal `ci.yml`.
+
+## 2026-10-23 — M1.2: minimal CI workflow
+
+- **What:** `.github/workflows/ci.yml` with one job, `build-test`: checkout → setup-node (`.nvmrc`, npm cache) → `npm ci` → `prisma generate` → `turbo build` → `turbo test`.
+- **Design decisions:**
+  - Triggers are `pull_request` → `main`, `push` → `main`, and `workflow_dispatch`. Feature-branch pushes do not run CI on their own, so a PR runs it. This avoids duplicate runs per push.
+  - Hardening: SHA-pinned actions, `contents: read`, `persist-credentials: false`, `ubuntu-24.04` pin, no `pull_request_target`, Turbo/Prisma telemetry off.
+  - Concurrency cancels superseded PR runs but never cancels `main` runs.
+  - No Turbo remote cache yet. With 8 small workspaces the npm cache is the main saving. Revisit if CI time exceeds ~5 min.
+- **Docs:** new [docs/ci-cd/github-actions.md](../ci-cd/github-actions.md).
+- **Finding (queued for M1.3):** `prisma/prisma.config.ts` is mojibake. It decodes to a byte-swapped JSON fragment `{"schema": "prisma/schema.prisma"}`, not TypeScript. Prisma ignores it (it only auto-loads `prisma.config.ts` from the project root), but Prettier/ESLint in M1.3 would fail on it. Plan: delete it, since the schema is already at Prisma's default path. `infrastructure/scripts/fix-encoding.ps1` is the likely origin and gets reviewed then too.
+- **Tests:** [test-results.md](test-results.md) (M1.2 section). Not yet run remotely.
+- **Next:** commit, push, open the PR → first remote run → M1.3.
