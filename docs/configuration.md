@@ -23,6 +23,7 @@ Validated at runtime by `@buildpipe/config` (Zod schema in `packages/config/src/
 | MCP_SERVER_PORT | 3002 | MCP server port (config only) |
 | API_INTERNAL_URL | http://localhost:3000 | Internal API URL for MCP/worker |
 | CORS_ORIGIN | * | Allowed CORS origins |
+| LOG_LEVEL | info | API log level (pino): trace, debug, info, warn, error, fatal, silent |
 
 ## Database
 

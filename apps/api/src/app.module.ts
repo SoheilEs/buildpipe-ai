@@ -27,6 +27,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
     ConfigModule.forRoot({ isGlobal: true, envFilePath: ['.env', '../../.env'] }),
     LoggerModule.forRoot({
       pinoHttp: {
+        level: process.env.LOG_LEVEL ?? 'info',
         transport: process.env.NODE_ENV !== 'production' ? { target: 'pino-pretty' } : undefined,
         redact: ['req.headers.authorization', 'password', 'kubeconfig', 'otp'],
         genReqId: (req) => (req.headers['x-request-id'] as string) ?? crypto.randomUUID(),

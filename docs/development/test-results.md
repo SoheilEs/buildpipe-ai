@@ -74,3 +74,15 @@ This is the first evidence from a clean Linux environment. Local Windows results
 | `npm run build`, `npm test` after formatting | exit 0; 8/8 build tasks, 3 suites / 7 tests |
 | `actionlint v1.7.12` on the updated `ci.yml` | exit 0 (local run has no shellcheck, so shell-script checks are skipped locally) |
 | Remote GitHub run | **NOT RUN**. Unconfirmed until it runs: that the runner has Go and shellcheck preinstalled for the `Workflow lint` job |
+
+## 2026-10-23: M1.4 e2e smoke tests (branch `ci/m1.4-e2e-smoke`, local, Node v24.18.0)
+
+| Command | Result |
+|---|---|
+| First `jest --config ./test/jest-e2e.json` | failed to load: `@kubernetes/client-node` (ESM-only) → `SyntaxError: Unexpected token 'export'`; ts-jest also warned about transforming workspace `dist/*.js`. Fixed with a module mock and `transform` limited to `.ts` |
+| `npm run test:e2e` | exit 0, **20/20 tests**, 1 suite, about 13 s, `--detectOpenHandles` reported nothing |
+| Negative test A: run test `S11` as a normal test | fails with `Expected: "viewer"  Received: "admin"`, so the defect is real and `it.failing` fails for the right reason |
+| Negative test B: temporarily make `JwtAuthGuard` always allow | **11 of 20 tests fail** (all anonymous-denial tests plus "viewer can read clusters" shape check). Guard restored; `git diff` empty |
+| `npm run build`, `typecheck` (now also covers `test/`), `npm test`, `lint`, `format:check` | all exit 0; unit tests still 3 suites / 7 tests; `apps/api/dist/main.js` present, no e2e files in `dist` |
+| `actionlint v1.7.12` on updated `ci.yml` | exit 0 |
+| Remote GitHub run | **NOT RUN** (no PR yet) |

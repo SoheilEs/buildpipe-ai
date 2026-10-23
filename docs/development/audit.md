@@ -76,6 +76,7 @@ No integration, contract, e2e, or security tests. `test:e2e` points to a missing
 | S8 | MCP server uses one static long-lived JWT (`MCP_JWT_TOKEN`). | `mcp-server/src/server.ts` | Credential replay; every MCP action attributed to one user |
 | S9 | Logs, events and annotations go into the LLM prompt with only control-char stripping; `stripSecretPatterns` exists but is **not called** on that path. | `ai/context`, `sanitize.util.ts` | Secret exfiltration to an external LLM; prompt injection |
 | S10 | LLM provider calls have no timeout, retry, or circuit breaker, and provider error bodies are stored as "evidence". | `ai-providers.ts` | Hangs; error text leaks into stored RCA |
+| **S11 (critical)** | `POST /auth/register` is public (`@Public()`), its DTO accepts `role`, and `AuthService.register` stores `dto.role`. Anyone can create an **admin** account unauthenticated and receives valid tokens. Proven by the e2e test `S11` (stored role `"admin"`, expected `"viewer"`). | `auth.controller.ts`, `auth.service.ts`, `auth.dto.ts` | Full privilege escalation: admin API, audit logs, cluster credentials, restart action |
 
 ## 7. Correctness and architecture debt
 

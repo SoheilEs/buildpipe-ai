@@ -64,3 +64,12 @@
   - `KubernetesFacadeService.listDeployments` accepts `userId` but never audits the call (the other read methods do). Renamed the parameter to `_userId` to satisfy lint. Belongs in the M2 hardening list.
 - **Tests:** [test-results.md](test-results.md) (M1.3 section). Not yet run remotely.
 - **Next:** owner review, push, PR, first remote run.
+
+## 2026-10-23: M1.4 e2e harness and API smoke test
+
+- **Branch:** `ci/m1.4-e2e-smoke` (from `main` at the M1.3 merge). Nothing committed yet.
+- **What:** `apps/api/test/{jest-e2e.json,setup-env.ts,api.e2e-spec.ts}`; `apps/api/src/app.setup.ts` extracted from `main.ts` so tests and production share one HTTP setup (behaviour unchanged); `LOG_LEVEL` env for pino (default `info`); `tsconfig.json` now includes `test/` so e2e specs are type-checked (the build config still excludes them); root `test:e2e` script + turbo task; ESLint jest globals for `*.e2e-spec.ts`; CI step in `Build and test`.
+- **Decision:** run the real `AppModule` with stubs for infrastructure only, rather than a hand-built mini app. This is what makes the auth/RBAC tests meaningful, and the mutation test shows they fail when the guard is removed.
+- **Finding S11 (critical):** discovered while writing the validation tests. `POST /auth/register` is public and honours `role: "admin"`. Documented in the audit and pinned with a failing-by-design test. **Not fixed in M1.4** (scope); recommended as the first item of M2.
+- **Known limits:** infrastructure is stubbed, so this does not test persistence, queues, NATS or Kubernetes.
+- **Next:** review, commit, push, PR, first remote run.

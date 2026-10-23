@@ -14,7 +14,7 @@ Each job is its own check on the PR. The check name is the job `name:`, with no 
 
 | Check name (use this in rulesets) | Job id | Runs | Fails when |
 |---|---|---|---|
-| `Build and test` | `build-test` | `npm ci`, `prisma generate`, build, **typecheck**, unit tests | Any step fails. Typecheck also covers `*.spec.ts`, which the build skips |
+| `Build and test` | `build-test` | `npm ci`, `prisma generate`, build, **typecheck**, unit tests, **e2e smoke tests** | Any step fails. Typecheck also covers `*.spec.ts`, which the build skips |
 | `Static checks` | `static-checks` | `npm ci`, ESLint (`npm run lint`), Prettier (`npm run format:check`) | A lint error or an unformatted file |
 | `Workflow lint` | `workflow-lint` | actionlint v1.7.12 (`go run …@v1.7.12`; Go and shellcheck come with the runner image) | A workflow syntax, expression or shell-script problem |
 
@@ -40,7 +40,7 @@ flowchart LR
 Run the same thing locally:
 
 ```bash
-npm ci && npx --no-install prisma generate && npm run build && npm run typecheck && npm test
+npm ci && npx --no-install prisma generate && npm run build && npm run typecheck && npm test && npm run test:e2e
 npm run lint && npm run format:check   # Static checks
 ```
 
@@ -71,3 +71,14 @@ actionlint runs shellcheck on `run:` blocks only when `shellcheck` is installed.
 ## Required checks
 
 Require all three checks on `main`: `Build and test`, `Static checks`, `Workflow lint` (Settings → Rules → Rulesets). That is M1.7, tracked as blocker B3. A check only appears in the picker after it has run once.
+
+## End-to-end smoke tests
+
+`npm run test:e2e` runs `apps/api/test/api.e2e-spec.ts` (config: `apps/api/test/jest-e2e.json`).
+
+- Boots the **real `AppModule`** and the same HTTP setup as production (`configureApp()` in `apps/api/src/app.setup.ts`: helmet, validation pipe, Swagger), then drives it with Supertest.
+- **Stubbed:** Prisma, the BullMQ queue service and NATS events, so no database, Redis or NATS is needed in CI. `@kubernetes/client-node` is replaced by an empty module because v1 is ESM-only and Jest runs CommonJS.
+- **Covers:** `/health`, security headers, the OpenAPI document, 401 for anonymous/malformed/forged/deleted-user tokens on protected routes (including the MCP bridge), 403 role checks (viewer/operator vs admin), request validation (empty body, unknown properties).
+- **Pinned defect:** the `S11` test uses `it.failing` and passes while public self-registration as `admin` is possible. When S11 is fixed it turns red; remove `.failing` then.
+- **Not covered:** real database behaviour, Redis/BullMQ, NATS, Kubernetes. Those need the integration suites planned for M3 and later.
+- Test-only environment values live in `apps/api/test/setup-env.ts` (`NODE_ENV=production` to avoid the pino-pretty worker, `LOG_LEVEL=silent`, throwaway secrets).
