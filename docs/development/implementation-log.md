@@ -64,3 +64,10 @@
   - `KubernetesFacadeService.listDeployments` accepts `userId` but never audits the call (the other read methods do). Renamed the parameter to `_userId` to satisfy lint. Belongs in the M2 hardening list.
 - **Tests:** [test-results.md](test-results.md) (M1.3 section). Not yet run remotely.
 - **Next:** owner review, push, PR, first remote run.
+
+## 2026-10-23: M1.3 verified and merged
+
+- PR #2 merged as `4f9060a` after all three checks passed on `250d39a` (evidence in [test-results.md](test-results.md)).
+- The assumption that runners ship Go held; the shellcheck assumption is not evidenced and is recorded as such.
+- **Open:** B3. `GET /repos/SoheilEs/buildpipe-ai/rulesets` still returns none, so `main` accepts direct pushes and unreviewed merges.
+- **Next:** owner creates the ruleset; then M1.4.
