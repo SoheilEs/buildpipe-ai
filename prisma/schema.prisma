@@ -10,6 +10,7 @@ datasource db {
 enum UserRole {
   viewer
   operator
+  approver
   admin
 }
 
@@ -31,6 +32,11 @@ enum RiskLevel {
   low
   medium
   high
+}
+
+enum WorkloadKind {
+  Deployment
+  StatefulSet
 }
 
 // Request lifecycle (ADR-0001). The names must match apps/api/src/service-requests/domain.
@@ -72,6 +78,7 @@ model User {
   incidents       Incident[]       @relation("IncidentCreator")
   auditLogs       AuditLog[]
   serviceRequests ServiceRequest[] @relation("ServiceRequestRequester")
+  servicesCreated Service[]        @relation("ServiceCreator")
 
   @@index([email])
   @@index([deletedAt])
@@ -117,6 +124,7 @@ model Cluster {
   deletedAt           DateTime?
 
   incidents Incident[]
+  services  Service[]
 
   @@index([name])
   @@index([deletedAt])
@@ -212,6 +220,7 @@ model ServiceRequest {
   id             String               @id @default(uuid())
   // Service card id, e.g. "nonroot-runtime-review". The services registry arrives in Phase 2.2.
   kind           String
+  serviceId      String
   status         ServiceRequestStatus @default(Requested)
   requesterId    String
   // Same key from the same requester returns the same request. NULLs never collide.
@@ -222,11 +231,13 @@ model ServiceRequest {
   updatedAt      DateTime             @updatedAt
 
   requester   User                       @relation("ServiceRequestRequester", fields: [requesterId], references: [id], onDelete: Restrict)
+  service     Service                    @relation(fields: [serviceId], references: [id], onDelete: Restrict)
   transitions ServiceRequestTransition[]
 
   @@unique([requesterId, idempotencyKey])
   @@index([status])
   @@index([requesterId])
+  @@index([serviceId])
 }
 
 // Append-only history. The application only ever inserts; rows are never updated or deleted.
@@ -246,4 +257,34 @@ model ServiceRequestTransition {
   request ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Restrict)
 
   @@index([requestId, seq])
+}
+
+// A registered workload that Infralark may review (brief section 6). One row per workload.
+// It stores where things are, never credentials: the collector, executor and Git identities
+// are configured separately (ADR-0002).
+model Service {
+  id            String       @id @default(uuid())
+  name          String       @unique
+  description   String?
+  clusterId     String
+  namespace     String
+  workloadKind  WorkloadKind
+  workloadName  String
+  // "github" is the only provider in the MVP; the column keeps the Git adapter swappable.
+  gitProvider   String       @default("github")
+  // "owner/name"
+  gitRepository String
+  gitBaseBranch String       @default("main")
+  // Repository-relative paths of the Git-managed manifests for this workload.
+  configPaths   String[]
+  createdById   String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  cluster   Cluster          @relation(fields: [clusterId], references: [id], onDelete: Restrict)
+  createdBy User             @relation("ServiceCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  requests  ServiceRequest[]
+
+  @@unique([clusterId, namespace, workloadKind, workloadName])
+  @@index([clusterId])
 }

@@ -5,6 +5,8 @@ import { RequestState } from './domain/request-state';
 import {
   ApplyTransitionInput,
   CreateRequestInput,
+  ListRequestsFilter,
+  UnknownServiceError,
   ServiceRequestRecord,
   ServiceRequestRepository,
   TransitionRecord,
@@ -13,6 +15,7 @@ import {
 const toRecord = (row: ServiceRequest): ServiceRequestRecord => ({
   id: row.id,
   kind: row.kind,
+  serviceId: row.serviceId,
   status: row.status as RequestState,
   requesterId: row.requesterId,
   idempotencyKey: row.idempotencyKey,
@@ -55,6 +58,7 @@ export class PrismaServiceRequestRepository extends ServiceRequestRepository {
         const request = await tx.serviceRequest.create({
           data: {
             kind: input.kind,
+            serviceId: input.serviceId,
             requesterId: input.requesterId,
             idempotencyKey: key,
           },
@@ -76,8 +80,31 @@ export class PrismaServiceRequestRepository extends ServiceRequestRepository {
         const existing = await this.findByKey(input.requesterId, key);
         if (existing) return { record: existing, created: false };
       }
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2003' &&
+        `${String(error.meta?.constraint ?? '')} ${String(error.meta?.field_name ?? '')}`.includes(
+          'serviceId',
+        )
+      ) {
+        throw new UnknownServiceError(input.serviceId);
+      }
       throw error;
     }
+  }
+
+  async list(filter: ListRequestsFilter): Promise<ServiceRequestRecord[]> {
+    const rows = await this.prisma.serviceRequest.findMany({
+      where: {
+        status: filter.status,
+        requesterId: filter.requesterId,
+        serviceId: filter.serviceId,
+      },
+      orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+      take: filter.limit,
+      skip: filter.offset,
+    });
+    return rows.map(toRecord);
   }
 
   async findById(id: string): Promise<ServiceRequestRecord | null> {

@@ -1,6 +1,7 @@
 export enum UserRoleEnum {
   VIEWER = 'viewer',
   OPERATOR = 'operator',
+  APPROVER = 'approver',
   ADMIN = 'admin',
 }
 
@@ -22,6 +23,11 @@ export enum AuditAction {
   K8S_PODS_LISTED = 'K8S_PODS_LISTED',
   K8S_LOGS_FETCHED = 'K8S_LOGS_FETCHED',
   K8S_EVENTS_FETCHED = 'K8S_EVENTS_FETCHED',
+  SERVICE_CREATED = 'SERVICE_CREATED',
+  SERVICE_UPDATED = 'SERVICE_UPDATED',
+  SERVICE_DELETED = 'SERVICE_DELETED',
+  REQUEST_CREATED = 'REQUEST_CREATED',
+  REQUEST_CANCELLED = 'REQUEST_CANCELLED',
 }
 
 export enum QueueJobName {

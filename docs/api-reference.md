@@ -21,8 +21,9 @@ Public endpoints marked @Public(): health, auth login/register/refresh, OAuth re
 | Role | Level | Access |
 |------|-------|--------|
 | viewer | 1 | Read-only |
-| operator | 2 | Create incidents, analyze, restart deployments |
-| admin | 3 | User management, audit logs |
+| operator | 2 | Create incidents, analyze, restart deployments; create and cancel own service requests |
+| approver | 3 | Everything an operator can do, plus approvals (Phase 3). Cannot approve their own request |
+| admin | 4 | User management, audit logs, register services, cancel any request |
 
 ## OTP-Protected Endpoints
 
@@ -144,6 +145,30 @@ Returns AiAnalysis with:
 - recommendations (string[])
 - riskLevel (low | medium | high)
 - provider, model
+
+## Services (registry)
+
+| Method | Path | Role | Description |
+|--------|------|------|-------------|
+| GET | /services | viewer | List registered services |
+| GET | /services/:id | viewer | Get a service |
+| POST | /services | admin | Register a service (cluster, namespace, workload, repository, manifest paths) |
+| PATCH | /services/:id | admin | Update a service; the merged result is validated |
+| DELETE | /services/:id | admin | Delete a service without requests (409 `SERVICE_IN_USE` otherwise) |
+
+Validation errors answer 400 with `code: INVALID_SERVICE` and a `problems` object per field. See [ADR-0007](adr/0007-services-registry-and-request-api.md).
+
+## Service requests
+
+| Method | Path | Role | Description |
+|--------|------|------|-------------|
+| POST | /service-requests | operator | Create a request `{ serviceId, kind: "nonroot-runtime-review" }`. Optional `Idempotency-Key` header: a repeat returns the original request with 200 |
+| GET | /service-requests | viewer | List, newest first. Filters: `status`, `requesterId`, `serviceId`, `limit` (1-100), `offset` |
+| GET | /service-requests/:id | viewer | Get a request |
+| GET | /service-requests/:id/history | viewer | State history, oldest first |
+| POST | /service-requests/:id/cancel | operator (own) / admin (any) | `{ reason }`; 403 `NOT_REQUESTER` otherwise |
+
+Errors from the state machine: 400 (`UNKNOWN_STATE`, `ACTOR_REQUIRED`, `REASON_REQUIRED`, `REASON_TOO_LONG`), 409 (`INVALID_TRANSITION`, `TERMINAL_STATE`, `CONCURRENT_MODIFICATION`), 403 (`SELF_APPROVAL`). There is no endpoint that sets a status directly. These endpoints are not exercised against a real cluster or a UI yet.
 
 ## Audit
 

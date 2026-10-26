@@ -19,8 +19,10 @@ if (!/^postgres(ql)?:\/\/[^@/]*@(localhost|127\.0\.0\.1|\[::1\])(:\d+)?\//.test(
 describe('service requests on PostgreSQL', () => {
   const prisma = new PrismaService();
   const service = new ServiceRequestsService(new PrismaServiceRequestRepository(prisma));
+  const KIND = 'nonroot-runtime-review';
   let requesterId: string;
   let approverId: string;
+  let serviceId: string;
 
   const newUser = async (label: string) =>
     (
@@ -30,12 +32,28 @@ describe('service requests on PostgreSQL', () => {
     ).id;
 
   const newRequest = async (idempotencyKey?: string) =>
-    (await service.create({ kind: 'nonroot-runtime-review', requesterId, idempotencyKey })).request;
+    (await service.create({ kind: KIND, serviceId, requesterId, idempotencyKey })).request;
 
   beforeAll(async () => {
     await prisma.$connect();
     requesterId = await newUser('requester');
     approverId = await newUser('approver');
+    const cluster = await prisma.cluster.create({
+      data: { name: 'db-test-' + randomUUID(), encryptedKubeconfig: 'not-a-real-kubeconfig' },
+    });
+    const svc = await prisma.service.create({
+      data: {
+        name: 'db-test-' + randomUUID(),
+        clusterId: cluster.id,
+        namespace: 'staging',
+        workloadKind: 'Deployment',
+        workloadName: 'app-' + randomUUID().slice(0, 8),
+        gitRepository: 'acme/config',
+        configPaths: ['deploy.yaml'],
+        createdById: approverId,
+      },
+    });
+    serviceId = svc.id;
   });
 
   afterAll(async () => {
@@ -56,8 +74,13 @@ describe('service requests on PostgreSQL', () => {
 
   it('returns the same request for a repeated idempotency key', async () => {
     const key = `key-${randomUUID()}`;
-    const first = await service.create({ kind: 'k', requesterId, idempotencyKey: key });
-    const second = await service.create({ kind: 'k', requesterId, idempotencyKey: key });
+    const first = await service.create({ kind: KIND, serviceId, requesterId, idempotencyKey: key });
+    const second = await service.create({
+      kind: KIND,
+      serviceId,
+      requesterId,
+      idempotencyKey: key,
+    });
     expect(first.created).toBe(true);
     expect(second.created).toBe(false);
     expect(second.request.id).toBe(first.request.id);
@@ -67,7 +90,7 @@ describe('service requests on PostgreSQL', () => {
     const key = `race-${randomUUID()}`;
     const results = await Promise.all(
       Array.from({ length: 8 }, () =>
-        service.create({ kind: 'k', requesterId, idempotencyKey: key }),
+        service.create({ kind: KIND, serviceId, requesterId, idempotencyKey: key }),
       ),
     );
     expect(new Set(results.map((r) => r.request.id)).size).toBe(1);
@@ -83,8 +106,16 @@ describe('service requests on PostgreSQL', () => {
     expect(a.id).not.toBe(b.id);
   });
 
+  it('rejects a request for a service that is not registered (400 SERVICE_NOT_FOUND)', async () => {
+    await expect(
+      service.create({ kind: KIND, serviceId: randomUUID(), requesterId }),
+    ).rejects.toMatchObject({ response: expect.objectContaining({ code: 'SERVICE_NOT_FOUND' }) });
+  });
+
   it('rejects a request for a requester that does not exist', async () => {
-    await expect(service.create({ kind: 'k', requesterId: randomUUID() })).rejects.toMatchObject({
+    await expect(
+      service.create({ kind: KIND, serviceId, requesterId: randomUUID() }),
+    ).rejects.toMatchObject({
       code: 'P2003',
     });
   });

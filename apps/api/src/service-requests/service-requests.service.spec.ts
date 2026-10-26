@@ -8,9 +8,11 @@ import { RequestState } from './domain/request-state';
 import {
   ApplyTransitionInput,
   CreateRequestInput,
+  ListRequestsFilter,
   ServiceRequestRecord,
   ServiceRequestRepository,
   TransitionRecord,
+  UnknownServiceError,
 } from './service-requests.repository';
 import { ServiceRequestsService } from './service-requests.service';
 
@@ -33,6 +35,7 @@ class InMemoryRepository extends ServiceRequestRepository {
     const record: ServiceRequestRecord = {
       id: `req-${++this.counter}`,
       kind: input.kind,
+      serviceId: input.serviceId,
       status: 'Requested',
       requesterId: input.requesterId,
       idempotencyKey: input.idempotencyKey ?? null,
@@ -66,6 +69,15 @@ class InMemoryRepository extends ServiceRequestRepository {
     return Promise.resolve({ ...next });
   }
 
+  list(filter: ListRequestsFilter) {
+    const rows = [...this.requests.values()]
+      .filter((r) => !filter.status || r.status === filter.status)
+      .filter((r) => !filter.requesterId || r.requesterId === filter.requesterId)
+      .filter((r) => !filter.serviceId || r.serviceId === filter.serviceId)
+      .slice(filter.offset, filter.offset + filter.limit);
+    return Promise.resolve(rows);
+  }
+
   listTransitions(requestId: string) {
     return Promise.resolve(this.history.filter((h) => h.requestId === requestId));
   }
@@ -90,13 +102,16 @@ class InMemoryRepository extends ServiceRequestRepository {
 }
 
 const REQUESTER = 'user-requester';
+const SERVICE = 'svc-1';
+const KIND = 'nonroot-runtime-review';
 const APPROVER = 'user-approver';
 
 async function setup() {
   const repo = new InMemoryRepository();
   const service = new ServiceRequestsService(repo);
   const { request } = await service.create({
-    kind: 'nonroot-runtime-review',
+    kind: KIND,
+    serviceId: SERVICE,
     requesterId: REQUESTER,
   });
   return { repo, service, id: request.id };
@@ -122,12 +137,14 @@ describe('ServiceRequestsService', () => {
       const repo = new InMemoryRepository();
       const service = new ServiceRequestsService(repo);
       const first = await service.create({
-        kind: 'k',
+        kind: KIND,
+        serviceId: SERVICE,
         requesterId: REQUESTER,
         idempotencyKey: 'abc',
       });
       const second = await service.create({
-        kind: 'k',
+        kind: KIND,
+        serviceId: SERVICE,
         requesterId: REQUESTER,
         idempotencyKey: 'abc',
       });
@@ -140,8 +157,18 @@ describe('ServiceRequestsService', () => {
     it('does not share a key between requesters', async () => {
       const repo = new InMemoryRepository();
       const service = new ServiceRequestsService(repo);
-      const a = await service.create({ kind: 'k', requesterId: 'a', idempotencyKey: 'abc' });
-      const b = await service.create({ kind: 'k', requesterId: 'b', idempotencyKey: 'abc' });
+      const a = await service.create({
+        kind: KIND,
+        serviceId: SERVICE,
+        requesterId: 'a',
+        idempotencyKey: 'abc',
+      });
+      const b = await service.create({
+        kind: KIND,
+        serviceId: SERVICE,
+        requesterId: 'b',
+        idempotencyKey: 'abc',
+      });
       expect(b.created).toBe(true);
       expect(b.request.id).not.toBe(a.request.id);
     });
@@ -149,19 +176,24 @@ describe('ServiceRequestsService', () => {
     it('without a key every call creates a new request', async () => {
       const repo = new InMemoryRepository();
       const service = new ServiceRequestsService(repo);
-      await service.create({ kind: 'k', requesterId: REQUESTER });
-      await service.create({ kind: 'k', requesterId: REQUESTER });
+      await service.create({ kind: KIND, serviceId: SERVICE, requesterId: REQUESTER });
+      await service.create({ kind: KIND, serviceId: SERVICE, requesterId: REQUESTER });
       expect(repo.requests.size).toBe(2);
     });
 
     it.each([
-      [{ kind: '', requesterId: REQUESTER }, 'INVALID_KIND'],
-      [{ kind: '   ', requesterId: REQUESTER }, 'INVALID_KIND'],
-      [{ kind: 'x'.repeat(101), requesterId: REQUESTER }, 'INVALID_KIND'],
-      [{ kind: 'k', requesterId: '' }, 'ACTOR_REQUIRED'],
-      [{ kind: 'k', requesterId: REQUESTER, idempotencyKey: '' }, 'INVALID_IDEMPOTENCY_KEY'],
+      [{ kind: '', serviceId: SERVICE, requesterId: REQUESTER }, 'INVALID_KIND'],
+      [{ kind: '   ', serviceId: SERVICE, requesterId: REQUESTER }, 'INVALID_KIND'],
+      [{ kind: 'x'.repeat(101), serviceId: SERVICE, requesterId: REQUESTER }, 'INVALID_KIND'],
+      [{ kind: 'some-other-card', serviceId: SERVICE, requesterId: REQUESTER }, 'INVALID_KIND'],
+      [{ kind: KIND, serviceId: '', requesterId: REQUESTER }, 'SERVICE_REQUIRED'],
+      [{ kind: KIND, serviceId: SERVICE, requesterId: '' }, 'ACTOR_REQUIRED'],
       [
-        { kind: 'k', requesterId: REQUESTER, idempotencyKey: 'x'.repeat(201) },
+        { kind: KIND, serviceId: SERVICE, requesterId: REQUESTER, idempotencyKey: '' },
+        'INVALID_IDEMPOTENCY_KEY',
+      ],
+      [
+        { kind: KIND, serviceId: SERVICE, requesterId: REQUESTER, idempotencyKey: 'x'.repeat(201) },
         'INVALID_IDEMPOTENCY_KEY',
       ],
     ])('rejects invalid input %#', async (input, code) => {
@@ -170,6 +202,30 @@ describe('ServiceRequestsService', () => {
         response: expect.objectContaining({ code }),
       });
       await expect(service.create(input)).rejects.toBeInstanceOf(BadRequestException);
+    });
+  });
+
+  describe('create with an unknown service', () => {
+    it('maps the repository error to 400 SERVICE_NOT_FOUND', async () => {
+      const repo = new InMemoryRepository();
+      jest.spyOn(repo, 'create').mockRejectedValue(new UnknownServiceError('nope'));
+      const service = new ServiceRequestsService(repo);
+      await expect(
+        service.create({ kind: KIND, serviceId: 'nope', requesterId: REQUESTER }),
+      ).rejects.toMatchObject({ response: expect.objectContaining({ code: 'SERVICE_NOT_FOUND' }) });
+    });
+  });
+
+  describe('list', () => {
+    it('filters by status and requester and pages', async () => {
+      const repo = new InMemoryRepository();
+      const service = new ServiceRequestsService(repo);
+      const a = await service.create({ kind: KIND, serviceId: SERVICE, requesterId: 'a' });
+      await service.create({ kind: KIND, serviceId: SERVICE, requesterId: 'b' });
+      await service.transition(a.request.id, 'Collecting', { actorId: 'system' });
+      expect(await service.list({ status: 'Collecting', limit: 10, offset: 0 })).toHaveLength(1);
+      expect(await service.list({ requesterId: 'b', limit: 10, offset: 0 })).toHaveLength(1);
+      expect(await service.list({ limit: 1, offset: 1 })).toHaveLength(1);
     });
   });
 
