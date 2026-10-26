@@ -6,7 +6,7 @@
 |---|---|---|---|---|
 | CI | [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) | PR → `main`, push to `main`, manual | Three jobs, listed below | M1.2, M1.3 |
 
-e2e, migration, Docker and security jobs are added in later steps. The schedule is in [implementation-plan.md §4](../development/implementation-plan.md).
+e2e, migration, Docker and security jobs are added in later steps. The schedule is in [implementation-plan.md §4](../history/buildpipe/implementation-plan.md).
 
 ## CI jobs
 

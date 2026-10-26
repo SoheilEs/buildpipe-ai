@@ -56,7 +56,7 @@ Each step is a separate small PR. The owner reviews and approves each one before
 
 | Step | Change | Why it comes first |
 |---|---|---|
-| **1.1** | Make `main` build: add `packageManager` to the root `package.json`, commit a `package-lock.json`, fix the spec import path, add `apps/api/tsconfig.build.json` that excludes specs, pin Node via `.nvmrc`. Proof: `npm ci && npm run build && npm test` green locally | The baseline build is broken today (see [test-results.md](test-results.md)). Without a lockfile, `npm ci` and cache keys cannot work |
+| **1.1** | Make `main` build: add `packageManager` to the root `package.json`, commit a `package-lock.json`, fix the spec import path, add `apps/api/tsconfig.build.json` that excludes specs, pin Node via `.nvmrc`. Proof: `npm ci && npm run build && npm test` green locally | The baseline build is broken today (see [test-results.md](../../testing.md)). Without a lockfile, `npm ci` and cache keys cannot work |
 | 1.2 | Minimal `ci.yml`: checkout → setup-node (cache npm) → `npm ci` → `prisma generate` → `turbo build` → `turbo test`. Read-only `permissions`, `concurrency` cancel-in-progress, actions pinned to SHAs | First green signal on real commands |
 | 1.3 | **Done locally** (see implementation-log M1.3): corrupt `prisma.config.ts` removed; ESLint, Prettier, typecheck and actionlint added; codebase formatted in a dedicated commit | Static gate |
 | 1.4 | Fix `test:e2e` (add `test/jest-e2e.json`) and add a first Supertest smoke (health + auth guard denies anonymous) | Real integration signal |

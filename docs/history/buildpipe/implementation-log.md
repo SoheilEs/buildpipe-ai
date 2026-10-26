@@ -2,7 +2,7 @@
 
 ## 2026-10-23 — Phase 0: audit, research, plan
 
-- **What:** Cloned `SoheilEs/buildpipe-ai@04083b3`, audited every app, package, schema, Dockerfile and doc. Ran a baseline install, build and test (results in [test-results.md](test-results.md)). Researched the AI-SRE market, agent guardrails, MCP security and GitHub Actions supply-chain practice.
+- **What:** Cloned `SoheilEs/buildpipe-ai@04083b3`, audited every app, package, schema, Dockerfile and doc. Ran a baseline install, build and test (results in [test-results.md](../../testing.md)). Researched the AI-SRE market, agent guardrails, MCP security and GitHub Actions supply-chain practice.
 - **Why:** The master prompt requires an audit before any implementation. CI/CD is to be built step by step with the owner.
 - **Files:** `docs/development/{audit,implementation-plan,progress,blockers,implementation-log,test-results}.md` (new).
 - **Code changes:** none.
@@ -26,7 +26,7 @@
 - **Deliberately not changed (later milestones):**
   - Dockerfiles still use `node:20-alpine` and `npm install` without the lockfile. Moving them to `node:24-alpine` + `npm ci` belongs to M4 (container hardening) and needs a running Docker daemon to verify.
   - npm 11.16 warns that 8 packages run install scripts not covered by `allowScripts`. They still run today. Recording an explicit allowlist (allow prisma/bcrypt/esbuild/msgpackr; deny the `@nestjs/core` opencollective and `@scarf/scarf` telemetry hooks) is queued for M4.
-- **Tests:** see [test-results.md](test-results.md) (M1.1 section).
+- **Tests:** see [test-results.md](../../testing.md) (M1.1 section).
 - **Next:** M1.2 minimal `ci.yml`.
 
 ## 2026-10-23 — M1.2: minimal CI workflow
@@ -37,14 +37,14 @@
   - Hardening: SHA-pinned actions, `contents: read`, `persist-credentials: false`, `ubuntu-24.04` pin, no `pull_request_target`, Turbo/Prisma telemetry off.
   - Concurrency cancels superseded PR runs but never cancels `main` runs.
   - No Turbo remote cache yet. With 8 small workspaces the npm cache is the main saving. Revisit if CI time exceeds ~5 min.
-- **Docs:** new [docs/ci-cd/github-actions.md](../ci-cd/github-actions.md).
+- **Docs:** new [docs/ci-cd/github-actions.md](../../ci-cd/github-actions.md).
 - **Finding (queued for M1.3):** `prisma/prisma.config.ts` is mojibake. It decodes to a byte-swapped JSON fragment `{"schema": "prisma/schema.prisma"}`, not TypeScript. Prisma ignores it (it only auto-loads `prisma.config.ts` from the project root), but Prettier/ESLint in M1.3 would fail on it. Plan: delete it, since the schema is already at Prisma's default path. `infrastructure/scripts/fix-encoding.ps1` is the likely origin and gets reviewed then too.
-- **Tests:** [test-results.md](test-results.md) (M1.2 section). Not yet run remotely.
+- **Tests:** [test-results.md](../../testing.md) (M1.2 section). Not yet run remotely.
 - **Next:** commit, push, open the PR → first remote run → M1.3.
 
 ## 2026-10-23: First remote CI run
 
-- PR #1 run `39938152396` passed (build 8/8, tests 7/7) on a clean `ubuntu-24.04` runner. M1.1 and M1.2 are therefore VERIFIED in CI. Evidence is in [test-results.md](test-results.md).
+- PR #1 run `39938152396` passed (build 8/8, tests 7/7) on a clean `ubuntu-24.04` runner. M1.1 and M1.2 are therefore VERIFIED in CI. Evidence is in [test-results.md](../../testing.md).
 - Auto-fix monitoring is enabled for PR #1.
 - **Next:** owner merges PR #1 and sets the required check; then M1.3.
 
@@ -62,12 +62,12 @@
   - Prisma 7 will drop `package.json#prisma` (seed config). Migrate to `prisma.config.ts` when upgrading Prisma, and use a valid file this time.
   - `infrastructure/scripts/fix-encoding.ps1` is stored as UTF-16LE without a BOM and cannot be parsed by PowerShell 5.1. It is the likely source of the corrupt config. Left untouched for now. Recommend deleting it: `.gitattributes` and CI now enforce encoding.
   - `KubernetesFacadeService.listDeployments` accepts `userId` but never audits the call (the other read methods do). Renamed the parameter to `_userId` to satisfy lint. Belongs in the M2 hardening list.
-- **Tests:** [test-results.md](test-results.md) (M1.3 section). Not yet run remotely.
+- **Tests:** [test-results.md](../../testing.md) (M1.3 section). Not yet run remotely.
 - **Next:** owner review, push, PR, first remote run.
 
 ## 2026-10-23: M1.3 verified and merged
 
-- PR #2 merged as `4f9060a` after all three checks passed on `250d39a` (evidence in [test-results.md](test-results.md)).
+- PR #2 merged as `4f9060a` after all three checks passed on `250d39a` (evidence in [test-results.md](../../testing.md)).
 - The assumption that runners ship Go held; the shellcheck assumption is not evidenced and is recorded as such.
 - **Open:** B3. `GET /repos/SoheilEs/buildpipe-ai/rulesets` still returns none, so `main` accepts direct pushes and unreviewed merges.
 - **Next:** owner creates the ruleset; then M1.4.
@@ -89,7 +89,7 @@
 
 ## 2026-10-23: M1.4 verified and merged
 
-- PR #4 merged as `8ce6f0a` after all three checks passed on `5b64096`; the post-merge run on `main` also passed (evidence in [test-results.md](test-results.md)).
+- PR #4 merged as `8ce6f0a` after all three checks passed on `5b64096`; the post-merge run on `main` also passed (evidence in [test-results.md](../../testing.md)).
 - The merge conflict with PR #3 was in the three append-only tracking docs and was resolved by keeping both sides (main's M1.3 entries first, then M1.4).
 - **S11 is fixed on `main`.** Deployments built from earlier code should still be reviewed for attacker-created admin users.
 - **Open:** B3. `GET /repos/SoheilEs/buildpipe-ai/rulesets` still returns none. M1 steps 1.5 (migration validation, needs Postgres in M3), 1.6 (Docker build check, needs M4) and 1.7 (branch protection) remain.

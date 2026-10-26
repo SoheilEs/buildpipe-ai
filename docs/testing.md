@@ -1,5 +1,27 @@
 # Test Results
 
+Results are Passed / Failed / Not run / Blocked. Entries from 2026-10-23 and earlier are BuildPipe-era history and keep their original wording.
+
+## 2026-10-26: Infralark Phase 0 baseline (local, Windows 11, Node v24.18.0)
+
+Branch `infralark/foundation` from `main` at `52b43d9` (after PRs #5, #6, #7 merged). Only docs, `CLAUDE.md`, one code comment path (`otp.service.ts`) differ from `main`.
+
+| Command | Result |
+|---|---|
+| `npm ci --no-audit --no-fund` | Passed in practice: later steps ran on the installed tree. Exit code not captured separately. npm warned about pending install scripts (`npm approve-scripts`) |
+| `npx prisma generate` | Passed |
+| `npm run build` | Passed: 8/8 tasks |
+| `npm run typecheck` | Passed: 12/12 tasks |
+| `npm test` | Passed: 5 suites, 40 tests |
+| `npm run test:e2e` | Passed: 3 suites, 43 tests |
+| `npm run lint` | Passed (exit 0) |
+| `npm run format:check` | Passed |
+| Docs link check (`node` script over all `*.md`, relative links) | Passed: 0 broken |
+| GitHub CI on this branch | Not run (nothing pushed yet) |
+| Docker image builds, real PostgreSQL, Redis/NATS, real Kubernetes, Kubescape, Git write, staging | Not run (none exist yet or are blocked by B1) |
+
+Turbo reported cached tasks on some runs, so build and typecheck timings are not meaningful here.
+
 ## 2026-10-23 — Phase 0 baseline (local, Windows 11, Node v24.18.0, npm 11.16.0)
 
 Commit `04083b3`, clean clone. No lockfile in the repo, so dependency versions were resolved fresh. The results are therefore **not reproducible** until M1.1 lands.
