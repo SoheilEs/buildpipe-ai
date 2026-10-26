@@ -10,11 +10,11 @@ IMPLEMENTED means the code exists. VERIFIED means tests or CI evidence are recor
 | M1.1 | Make main build: lockfile, packageManager, Node pin, spec fix | VERIFIED (CI) | CI run 39938152396 green: build 8/8, tests 7/7 ([results](test-results.md)) | this file, implementation-log | Docker build unverified (daemon not running locally) |
 | M1.2 | Minimal `ci.yml` | VERIFIED (CI) | actionlint clean; PR run 39938152396 green | [github-actions.md](../ci-cd/github-actions.md) | PR #1 awaiting owner merge; required check not yet enforced (B3) |
 | M1.3 | Static checks: ESLint, Prettier, typecheck, actionlint | VERIFIED (CI) | PR run 39939976084: all 3 checks green ([results](test-results.md)) | [github-actions.md](../ci-cd/github-actions.md) | Merged in PR #2 (4f9060a) |
-| M1.4 | e2e harness + API smoke | IMPLEMENTED | 24 e2e tests pass locally; **not yet run on GitHub** ([results](test-results.md)) | [github-actions.md](../ci-cd/github-actions.md) | Branch `ci/m1.4-e2e-smoke`, awaiting review |
+| M1.4 | e2e harness + API smoke (+ S11 fix) | VERIFIED (CI) | PR run 39942238735: all 3 checks green, 24 e2e tests ([results](test-results.md)) | [github-actions.md](../ci-cd/github-actions.md) | Merged in PR #4 (8ce6f0a) |
 | M1.5 | Migration validation job | NOT_STARTED | — | — | M3 |
 | M1.6 | Docker build check | NOT_STARTED | — | — | M4 |
-| M1.7 | Branch protection | NOT_STARTED | — | — | B3 |
-| M2 | Security hardening S1–S5, S9, S10 (S11 fixed in M1.4) | NOT_STARTED | — | [audit.md §6](audit.md) | — |
+| M1.7 | Branch protection | VERIFIED (GitHub API) | ruleset `protect-main` read back: active, no bypass, 3 required checks | [github-actions.md](../ci-cd/github-actions.md) | A rejected direct push has not been exercised; add a new job name to the ruleset whenever CI gains a job |
+| M2 | Security hardening S1–S5, S9, S10 (S11 fixed and verified in M1.4) | NOT_STARTED | — | [audit.md §6](audit.md) | — |
 | M2.2 | Secrets, default admin and CORS (S4, S5, S13) | IMPLEMENTED | 40 unit + 31 e2e pass locally; real-process boot refusals 12/12; seed run through 5 scenarios ([results](test-results.md)) | [audit.md](audit.md), [configuration](../configuration.md), [deployment](../deployment.md) | Branch `security/m2.2-secrets-cors`, awaiting review. Breaking for existing deployments, see the upgrade notes in deployment.md |
 | M3 | Postgres + migrations + tenancy | NOT_STARTED | — | — | — |
 | M4 | Container hardening + `security.yml` | NOT_STARTED | — | — | — |
@@ -30,4 +30,4 @@ IMPLEMENTED means the code exists. VERIFIED means tests or CI evidence are recor
 
 ## Resume point
 
-Next action: owner reviews and merges PR #4 (M1.4 + the S11 fix), then creates the `protect-main` ruleset requiring `Build and test`, `Static checks`, `Workflow lint` (B3, still open: no ruleset exists). Then **M2** covers the remaining findings S1–S5, S9, S10.
+Next action: **M2** (remaining security findings S1–S5, S9, S10). The M1.5 migration check and M1.6 Docker build check wait for M3 and M4.
