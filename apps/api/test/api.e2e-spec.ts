@@ -93,7 +93,7 @@ describe('API smoke (e2e)', () => {
 
     it('serves the OpenAPI document with the documented routes', async () => {
       const res = await request(app.getHttpServer()).get('/api/docs-json').expect(200);
-      expect(res.body.info.title).toBe('BuildPipe AI API');
+      expect(res.body.info.title).toBe('Infralark API');
       expect(Object.keys(res.body.paths)).toEqual(
         expect.arrayContaining(['/health', '/auth/login', '/clusters', '/incidents']),
       );

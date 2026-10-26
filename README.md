@@ -1,6 +1,8 @@
-# BuildPipe AI
+# Infralark
 
-AI-powered Kubernetes Incident Intelligence Platform.
+Infralark is a panel for requesting and executing standard DevOps procedures with evidence, access control, human approval and verified results. The MVP is one service: review and prepare a non-root runtime fix for one Kubernetes workload, test it in staging after approval, and produce a before/after report.
+
+**Status: in development.** See [docs/progress.md](./docs/progress.md) for what exists and what is verified. The repository was built on BuildPipe AI; its incident, AI analysis and MCP features are retained as legacy and are described in the docs below. Product scope: [docs/product/infralark-mvp.md](./docs/product/infralark-mvp.md).
 
 ## Documentation
 

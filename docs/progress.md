@@ -7,8 +7,8 @@ IMPLEMENTED means the code or document exists. VERIFIED means tests or CI eviden
 
 | Phase | Scope | Status | Evidence | Blockers |
 |---|---|---|---|---|
-| 0 | Repository audit and plan | IMPLEMENTED (docs only, awaiting owner review) | [architecture/overview.md](architecture/overview.md), [product/infralark-mvp.md](product/infralark-mvp.md), ADR [0001](adr/0001-request-state-machine.md), [0002](adr/0002-module-boundaries-and-legacy.md), [0003](adr/0003-frontend-scope.md). Baseline checks on `main` (52b43d9) are in [testing.md](testing.md) | ADR-0001 states need owner confirmation |
-| 1 | Display rename, docs skeleton, CI | NOT_STARTED | — | Frontend is content-only in a separate repo (ADR-0003). Staging CD blocked by B1 |
+| 0 | Repository audit and plan | VERIFIED (CI) | Merged in PR #8 (199142a); CI run 40363558037 green (3 checks). Docs: [architecture/overview.md](architecture/overview.md), [product/infralark-mvp.md](product/infralark-mvp.md), ADR [0001](adr/0001-request-state-machine.md), [0002](adr/0002-module-boundaries-and-legacy.md), [0003](adr/0003-frontend-scope.md) | ADR-0001 state set taken as accepted by merge; owner can still amend |
+| 1 | Display rename, docs skeleton, CI | IN_PROGRESS | Branch `infralark/phase-1-rename`: display rename and [ADR-0004](adr/0004-identifiers-keep-buildpipe-names.md) IMPLEMENTED, local checks in [testing.md](testing.md); not yet in CI. See sub-items below | Staging CD blocked by B1; frontend content edit is a separate repo (ADR-0003) |
 | 2 | Read-only end-to-end flow | NOT_STARTED | — | PostgreSQL step first (owner decision) |
 | 3 | Approval, Git PR, staging execution, verification | NOT_STARTED | — | Staging cluster (B1), scoped Git credential |
 | 4 | Fixtures, reproducible staging, demo, metrics | NOT_STARTED | — | — |
@@ -16,7 +16,18 @@ IMPLEMENTED means the code or document exists. VERIFIED means tests or CI eviden
 
 Open owner inputs: staging cluster or permission to use kind in CI (B1); LLM key or local endpoint, only for live AI runs (B4); a scoped GitHub credential and a config repo for fixtures (Phase 3); how OTPs are delivered if used as a step-up factor (B7).
 
-Next action: owner reviews Phase 0 docs. Then Phase 1: ADR for identifiers that keep their BuildPipe names, display rename, and content-only edits in the frontend repo.
+### Phase 1 sub-items
+
+| Item | Status | Note |
+|---|---|---|
+| 1.1 Display rename + identifier ADR | IMPLEMENTED (local checks pass) | Identifiers kept on purpose, listed in ADR-0004 |
+| 1.2 Translation-ready strings | NOT APPLICABLE here | Backend has no UI text; the frontend repo already uses next-intl (en, de) |
+| 1.3 Docs skeleton | IMPLEMENTED | `docs/runbooks/` is a placeholder until Phase 4 |
+| 1.4 CI | Existing, unchanged | `ci.yml` already runs `npm ci` (lockfile), build, typecheck, unit, e2e, ESLint, Prettier, actionlint |
+| 1.5 Staging CD workflow | NOT_STARTED, BLOCKED (B1) | Workflow and setup guide can be drafted; it cannot be run without a staging target |
+| 1.6 Frontend content edit (repo `Desktop/velnor`) | NOT_STARTED | Content only, no design change (ADR-0003) |
+
+Next action: owner reviews the Phase 1 PR; then 1.6 (frontend content) and 1.5 (staging CD draft).
 
 ## BuildPipe baseline milestones (carried over)
 

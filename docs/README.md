@@ -1,6 +1,6 @@
-# BuildPipe AI Documentation
+# Infralark Documentation
 
-BuildPipe AI is an AI-powered Kubernetes incident intelligence platform for registering clusters, tracking incidents, enriching them with live K8s context, and running AI-assisted root-cause analysis.
+Infralark is in development; see [progress.md](./progress.md) and [product/infralark-mvp.md](./product/infralark-mvp.md). The guides below were written for the BuildPipe AI base platform (clusters, incidents, AI-assisted root-cause analysis, MCP). That functionality is retained as legacy, not as the Infralark product.
 
 ## Documentation Index
 

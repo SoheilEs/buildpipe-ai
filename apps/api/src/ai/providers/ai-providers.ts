@@ -113,7 +113,7 @@ export class ClaudeProvider implements AiProvider {
   }
 }
 
-export const SYSTEM_PROMPT = `You are an expert Kubernetes SRE assistant for BuildPipe AI.
+export const SYSTEM_PROMPT = `You are an expert Kubernetes SRE assistant for Infralark.
 
 RULES:
 - Use ONLY the infrastructure context provided in the user message.

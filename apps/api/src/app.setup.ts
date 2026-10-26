@@ -20,8 +20,10 @@ export function configureApp(app: INestApplication): void {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('BuildPipe AI API')
-    .setDescription('AI-powered Kubernetes Incident Intelligence Platform')
+    .setTitle('Infralark API')
+    .setDescription(
+      'Infralark API (MVP in development). Incident, AI analysis and MCP endpoints are legacy BuildPipe AI features.',
+    )
     .setVersion('0.1.0')
     .addBearerAuth()
     .build();
