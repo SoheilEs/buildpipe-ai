@@ -33,6 +33,21 @@ enum RiskLevel {
   high
 }
 
+// Request lifecycle (ADR-0001). The names must match apps/api/src/service-requests/domain.
+enum ServiceRequestStatus {
+  Requested
+  Collecting
+  NeedsReview
+  ProposalReady
+  AwaitingApproval
+  Approved
+  Testing
+  Verified
+  Failed
+  Rejected
+  Cancelled
+}
+
 enum OtpPurpose {
   cluster_register
   cluster_update
@@ -52,10 +67,11 @@ model User {
   updatedAt    DateTime     @updatedAt
   deletedAt    DateTime?
 
-  refreshTokens RefreshToken[]
-  otpChallenges OtpChallenge[]
-  incidents     Incident[]     @relation("IncidentCreator")
-  auditLogs     AuditLog[]
+  refreshTokens   RefreshToken[]
+  otpChallenges   OtpChallenge[]
+  incidents       Incident[]       @relation("IncidentCreator")
+  auditLogs       AuditLog[]
+  serviceRequests ServiceRequest[] @relation("ServiceRequestRequester")
 
   @@index([email])
   @@index([deletedAt])
@@ -180,14 +196,54 @@ model AuditLog {
 }
 
 model FailedJob {
-  id          String   @id @default(uuid())
-  queueName   String
-  jobName     String
-  jobId       String
-  payload     String
-  error       String
-  attempts    Int
-  failedAt    DateTime @default(now())
+  id        String   @id @default(uuid())
+  queueName String
+  jobName   String
+  jobId     String
+  payload   String
+  error     String
+  attempts  Int
+  failedAt  DateTime @default(now())
 
   @@index([queueName, failedAt])
+}
+
+model ServiceRequest {
+  id             String               @id @default(uuid())
+  // Service card id, e.g. "nonroot-runtime-review". The services registry arrives in Phase 2.2.
+  kind           String
+  status         ServiceRequestStatus @default(Requested)
+  requesterId    String
+  // Same key from the same requester returns the same request. NULLs never collide.
+  idempotencyKey String?
+  // Optimistic lock: every transition increments it and only applies to the version it read.
+  version        Int                  @default(0)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  requester   User                       @relation("ServiceRequestRequester", fields: [requesterId], references: [id], onDelete: Restrict)
+  transitions ServiceRequestTransition[]
+
+  @@unique([requesterId, idempotencyKey])
+  @@index([status])
+  @@index([requesterId])
+}
+
+// Append-only history. The application only ever inserts; rows are never updated or deleted.
+model ServiceRequestTransition {
+  id         String                @id @default(uuid())
+  // Strict insertion order. createdAt can tie within a millisecond; seq cannot.
+  seq        Int                   @default(autoincrement())
+  requestId  String
+  // Null only for the creation row.
+  fromStatus ServiceRequestStatus?
+  toStatus   ServiceRequestStatus
+  // A user id, or "system" for the worker. Not a foreign key on purpose.
+  actorId    String
+  reason     String?
+  createdAt  DateTime              @default(now())
+
+  request ServiceRequest @relation(fields: [requestId], references: [id], onDelete: Restrict)
+
+  @@index([requestId, seq])
 }

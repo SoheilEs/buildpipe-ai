@@ -19,6 +19,7 @@ import { QueueModule } from './queue/queue.module';
 import { WebsocketModule } from './websocket/websocket.module';
 import { McpModule } from './mcp/mcp.module';
 import { MetricsModule } from './metrics/metrics.module';
+import { ServiceRequestsModule } from './service-requests/service-requests.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { validateEnv } from './config/env.validation';
@@ -45,6 +46,7 @@ import { validateEnv } from './config/env.validation';
     AuditModule,
     HealthModule,
     MetricsModule,
+    ServiceRequestsModule,
     EventsModule,
     QueueModule,
     ClustersModule,

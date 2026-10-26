@@ -2,6 +2,22 @@
 
 Results are Passed / Failed / Not run / Blocked. Entries from 2026-10-23 and earlier are BuildPipe-era history and keep their original wording.
 
+## 2026-10-26: Phase 2.1 request state machine (local, Node v24.18.0)
+
+Branch `infralark/phase-2-1-request-state-machine` from `main` at `6baa592`.
+
+| Check | Result |
+|---|---|
+| Domain unit tests (`request-state.spec.ts`) | Passed: 164 tests. All 121 ordered state pairs are checked against an independent copy of ADR-0001 (20 allowed), plus final states, unknown states, actor, reasons, reason length and separation of duties |
+| Service unit tests (`service-requests.service.spec.ts`, in-memory repository) | Passed: 24 tests. Idempotent create, happy path, 400/403/404/409 mapping, concurrent change, duplicate delivery |
+| Mutation checks, domain | Extra allowed edge Requested->Approved: 3 failed. Self-approval guard removed: 2 failed. Reason requirement for Failed removed: 2 failed. Restored: 164 passed |
+| Real PostgreSQL 16.14 (throwaway embedded build, **not** the Docker image): `prisma migrate deploy` of both migrations, then `migrate diff --exit-code` | Passed: "No difference detected" |
+| `npm run test:db` against that database | Passed: 12 tests. Creation row, idempotent key (sequential and 8 parallel creates give one row), NULL keys, foreign key, happy path order, rejected move leaves no trace, two conflicting parallel transitions apply once, five parallel duplicate deliveries apply once, trigger refuses UPDATE, DELETE and TRUNCATE |
+| Mutation checks, database layer | Compare-and-set on version and status removed: 2 failed, 10 passed. Unique-violation recovery disabled: 1 failed, 11 passed. Restored: 12 passed |
+| Full repo checks on the final tree | build 8/8, typecheck 12/12, unit 7 suites / 233 tests, e2e 3 suites / 43 tests (these stub Prisma; the new module loads in the app), lint, format:check, actionlint, docs links: all Passed |
+| New CI step (`test:db` inside the `Migrations` job) on GitHub | **Not run yet** |
+| HTTP endpoints, role checks | Not built (no controller in this phase) |
+
 ## 2026-10-26: Phase 2.0 PostgreSQL migration (local, Node v24.18.0)
 
 Branch `infralark/phase-2-0-postgres` from `main` at `3c2afec`.
