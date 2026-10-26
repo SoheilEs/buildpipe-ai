@@ -152,6 +152,9 @@ jobs:
       - name: Schema drift check
         run: npx --no-install prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code
 
+      - name: Service request tests on PostgreSQL
+        run: npm run test:db -w @buildpipe/api
+
       - name: Seed runs on PostgreSQL (twice, must be idempotent)
         env:
           ADMIN_EMAIL: ci-admin@example.test

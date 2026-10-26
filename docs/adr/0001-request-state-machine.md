@@ -1,6 +1,6 @@
 # ADR-0001: Service request state machine
 
-Status: proposed (Phase 0), 2026-10-26.
+Status: request machine implemented in Phase 2.1 (2026-10-26); the execution machine is Phase 3. Merged in Phase 0 without objection; owner may still amend.
 
 ## Context
 
@@ -33,6 +33,15 @@ Rules:
 - Every invalid transition throws a typed domain error. Each allowed and each disallowed pair gets a test.
 - Terminal states cannot be left. A retry is a new request or a new Execution row, never a state rewind.
 - `Failed` carries a machine-readable reason (collection error, test failure, timeout, worker loss) and `Blocked`/`Not run` are report-level labels, not request states.
+
+## Implementation notes (Phase 2.1)
+
+- Domain: `apps/api/src/service-requests/domain/request-state.ts` (pure). Besides the table it enforces: an actor on every move, a reason (max 1000 characters) for moves to NeedsReview, Failed, Rejected, Cancelled and for invalidation back to ProposalReady, and **separation of duties**: the requester cannot move their own request from AwaitingApproval to Approved or Rejected.
+- Failure mapping in `ServiceRequestsService`: unknown state, missing actor or reason answer 400; invalid or final-state moves 409; self-approval 403; a lost race 409 `CONCURRENT_MODIFICATION`.
+- Concurrency: each request has a `version`. A transition is a compare-and-set on `(id, version, status)` in one database transaction together with its history row. A duplicate or racing message therefore applies at most once.
+- History: table `ServiceRequestTransition`, ordered by a `seq` column. Inserts only: a database trigger rejects UPDATE, DELETE and TRUNCATE. This is a guard against application bugs and casual edits, not against a database administrator, who can drop the trigger.
+- Idempotent create: unique `(requesterId, idempotencyKey)`; parallel creates with the same key produce one request.
+- No controller yet. Who may call which transition (roles) is enforced in the HTTP layer that arrives with the services registry (Phase 2.2). The domain does not model roles.
 
 ## Consequences
 

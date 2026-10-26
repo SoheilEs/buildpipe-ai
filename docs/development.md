@@ -112,6 +112,7 @@ Requires MCP_JWT_TOKEN (get from POST /auth/login) and API running.
 | npm run test | Run tests |
 | npm run db:generate | prisma generate |
 | npm run db:deploy | prisma migrate deploy |
+| npm run test:db -w @buildpipe/api | Database tests; needs a throwaway PostgreSQL on localhost with migrations applied, leaves rows behind |
 | npm run db:migrate | prisma migrate dev |
 | npm run db:seed | Seed admin user |
 
