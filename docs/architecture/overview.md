@@ -39,7 +39,7 @@ Labels: Exists & verified / Partial / New / Unknown. Evidence is file paths. "Ve
 | integrations | Partial | `clusters` (encrypted kubeconfig), `kubernetes`, `packages/kubernetes-sdk` (read plus restart). No Git, scanner, or least-privilege per-identity credentials |
 | services | Partial (Phase 2.2) | registry model, strict validation, admin-only CRUD with audit, in `apps/api/src/services`. Stores locations only; no Kubernetes-side existence check yet |
 | service-requests | Partial (Phase 2.1) | state machine, persistence, history and idempotent create exist in `apps/api/src/service-requests` with unit and PostgreSQL tests. HTTP layer added in Phase 2.2: create, list, read, history, cancel; no arbitrary status endpoint |
-| evidence | Partial | `apps/api/src/ai/context/*` reduces and scores logs/events (unit-tested). No evidence records with source/version |
+| evidence | Partial (Phase 2.3) | `apps/api/src/evidence`: redacted, append-only evidence with source, source id, version and time, and findings that cite it (unit and PostgreSQL tests). No collectors yet (Phase 2.4 to 2.6). The legacy `ai/context/*` incident pipeline is separate |
 | analysis | Partial | `apps/api/src/ai/*` exists but has open findings S9 (no redaction in prompt path) and S10 (no timeout); `confidence` field conflicts with product rules |
 | proposals | New | none |
 | approvals | New | only OTP guard (`auth/guards/otp.guard.ts`), not bound to an action |

@@ -9,7 +9,7 @@ IMPLEMENTED means the code or document exists. VERIFIED means tests or CI eviden
 |---|---|---|---|---|
 | 0 | Repository audit and plan | VERIFIED (CI) | Merged in PR #8 (199142a); CI run 40363558037 green (3 checks). Docs: [architecture/overview.md](architecture/overview.md), [product/infralark-mvp.md](product/infralark-mvp.md), ADR [0001](adr/0001-request-state-machine.md), [0002](adr/0002-module-boundaries-and-legacy.md), [0003](adr/0003-frontend-scope.md) | ADR-0001 state set taken as accepted by merge; owner can still amend |
 | 1 | Display rename, docs skeleton, CI | IN_PROGRESS | 1.1 merged in PR #9 (eb08cd4), CI run 40365615314 green. 1.5 draft on branch `infralark/phase-1-5-staging-cd`. Sub-items below | Staging CD blocked by B1; frontend content edit is a separate repo (ADR-0003) |
-| 2 | Read-only end-to-end flow | IN_PROGRESS | 2.0 PostgreSQL: VERIFIED (CI), merged in PR #11, `Migrations` job green on run 40375367643 ([ADR-0006](adr/0006-postgresql.md)). 2.1: VERIFIED (CI), merged in PR #12 (run 40377469142 green, including `test:db`). 2.2 services registry, approver role and request API: IMPLEMENTED on branch `infralark/phase-2-2-services-and-requests-api` ([ADR-0007](adr/0007-services-registry-and-request-api.md)); CI not run yet. 2.3 to 2.10 NOT_STARTED | Existing SQLite data is not migrated; owner must add the `Migrations` check to ruleset `protect-main` |
+| 2 | Read-only end-to-end flow | IN_PROGRESS | 2.0 PostgreSQL: VERIFIED (CI), merged in PR #11, `Migrations` job green on run 40375367643 ([ADR-0006](adr/0006-postgresql.md)). 2.1: VERIFIED (CI), merged in PR #12 (run 40377469142 green, including `test:db`). 2.2 services registry, approver role and request API: IMPLEMENTED on branch `infralark/phase-2-2-services-and-requests-api` ([ADR-0007](adr/0007-services-registry-and-request-api.md)); CI not run yet. 2.3 evidence and findings: IMPLEMENTED on branch `infralark/phase-2-3-evidence-findings`, stacked on the 2.2 branch ([ADR-0008](adr/0008-evidence-and-findings.md)); CI not run yet. 2.4 to 2.10 NOT_STARTED | Existing SQLite data is not migrated; owner must add the `Migrations` check to ruleset `protect-main` |
 | 3 | Approval, Git PR, staging execution, verification | NOT_STARTED | — | Staging cluster (B1), scoped Git credential |
 | 4 | Fixtures, reproducible staging, demo, metrics | NOT_STARTED | — | — |
 | 5 | Pilot readiness | NOT_STARTED | — | — |
@@ -27,7 +27,7 @@ Open owner inputs: staging cluster or permission to use kind in CI (B1); LLM key
 | 1.5 Staging CD workflow | DRAFT, unverified, BLOCKED (B1) | `deploy-staging.yml` passes actionlint only; never run. [ADR-0005](adr/0005-staging-cd.md), [runbook](runbooks/staging-deploy-setup.md). Needs a staging cluster, a published image (M5) and a Helm chart (Phase 5) |
 | 1.6 Frontend content edit (repo `Desktop/velnor`) | IMPLEMENTED locally | Branch `content/infralark-product`, commit 137b9ce, not pushed; lint, typecheck, build pass (ADR-0003) |
 
-Next action: owner reviews the Phase 2.2 PR and adds `Migrations` to ruleset `protect-main`. Phase 2.3 (evidence and findings models) follows.
+Next action: owner reviews the Phase 2.2 PR and adds `Migrations` to ruleset `protect-main`. Phase 2.4 (read-only Kubernetes adapter, the first evidence collector) follows. The Phase 2.3 PR is stacked on 2.2: merge 2.2 first.
 
 ## BuildPipe baseline milestones (carried over)
 
