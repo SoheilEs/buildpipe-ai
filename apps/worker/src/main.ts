@@ -124,7 +124,7 @@ healthWorker.on('failed', (job, err) => {
 });
 
 async function main() {
-  console.log('BuildPipe AI Worker started');
+  console.log('Infralark Worker started');
   await setupNatsSubscriber();
 
   setInterval(

@@ -1,8 +1,8 @@
 # Project Overview
 
-## What Is BuildPipe AI?
+## What Is Infralark?
 
-BuildPipe AI is a backend platform for Kubernetes incident intelligence. It connects to clusters, captures incident context (pods, events, logs), runs AI analysis for root-cause hypotheses, and maintains audit trails with role-based access control.
+Infralark is a backend platform. Its base, inherited from BuildPipe AI, provides Kubernetes incident intelligence; the Infralark workflow itself is described in [product/infralark-mvp.md](product/infralark-mvp.md) and is not implemented yet. It connects to clusters, captures incident context (pods, events, logs), runs AI analysis for root-cause hypotheses, and maintains audit trails with role-based access control.
 
 There is no frontend in this repository. Clients use REST, Swagger, WebSocket, or MCP.
 

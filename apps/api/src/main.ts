@@ -10,7 +10,7 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
-  app.get(Logger).log(`BuildPipe AI API running on http://localhost:${port}`);
+  app.get(Logger).log(`Infralark API running on http://localhost:${port}`);
   app.get(Logger).log(`Swagger docs: http://localhost:${port}/api/docs`);
 }
 

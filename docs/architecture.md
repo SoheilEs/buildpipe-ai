@@ -1,6 +1,8 @@
 # Architecture
 
-This document describes how BuildPipe AI components fit together, how data flows through the system, and the design decisions behind each layer.
+> Describes the inherited BuildPipe AI base (incidents, AI analysis, MCP). Those features are legacy; the Infralark workflow is in [product/infralark-mvp.md](product/infralark-mvp.md).
+
+This document describes how Infralark components fit together, how data flows through the system, and the design decisions behind each layer.
 
 ## High-Level Architecture
 

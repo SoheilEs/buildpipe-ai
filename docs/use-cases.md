@@ -1,6 +1,8 @@
 # Use Cases
 
-This document describes who uses BuildPipe AI, what problems it solves, and detailed workflows for common operational scenarios.
+> Describes the inherited BuildPipe AI base (incidents, AI analysis, MCP). Those features are legacy; the Infralark workflow is in [product/infralark-mvp.md](product/infralark-mvp.md).
+
+This document describes who uses Infralark, what problems it solves, and detailed workflows for common operational scenarios.
 
 ---
 
@@ -10,7 +12,7 @@ This document describes who uses BuildPipe AI, what problems it solves, and deta
 
 **Goals:** Respond to production incidents quickly, gather K8s context, get AI-assisted root-cause hypotheses.
 
-**Uses BuildPipe AI to:**
+**Uses Infralark to:**
 
 - Register and test cluster connections
 - Create incidents when alerts fire
@@ -22,7 +24,7 @@ This document describes who uses BuildPipe AI, what problems it solves, and deta
 
 **Goals:** Oversight, access control, compliance.
 
-**Uses BuildPipe AI to:**
+**Uses Infralark to:**
 
 - Manage user accounts and roles
 - Review audit logs for sensitive operations
@@ -32,7 +34,7 @@ This document describes who uses BuildPipe AI, what problems it solves, and deta
 
 **Goals:** Visibility without making changes.
 
-**Uses BuildPipe AI to:**
+**Uses Infralark to:**
 
 - List clusters and incidents
 - Browse Kubernetes resources (pods, logs, events)
@@ -42,7 +44,7 @@ This document describes who uses BuildPipe AI, what problems it solves, and deta
 
 **Goals:** Programmatic cluster inspection and incident analysis.
 
-**Uses BuildPipe AI via MCP tools to:**
+**Uses Infralark via MCP tools to:**
 
 - Fetch pod status and logs during automated triage
 - Trigger analysis from external runbooks
@@ -54,7 +56,7 @@ This document describes who uses BuildPipe AI, what problems it solves, and deta
 
 ### Scenario
 
-A platform team wants to connect their production EKS cluster to BuildPipe AI for incident tracking.
+A platform team wants to connect their production EKS cluster to Infralark for incident tracking.
 
 ### Preconditions
 
@@ -107,7 +109,7 @@ Structured incident record with AI-assisted triage, reducing mean-time-to-diagno
 
 A Java service is killed by the OOM killer.
 
-### Why BuildPipe AI Helps
+### Why Infralark Helps
 
 The event scorer assigns 0.95 confidence to OOMKilled events, prioritizing them in the AI context bundle.
 
@@ -190,11 +192,11 @@ Admins use GET /audit/logs to review DEPLOYMENT_RESTARTED, CLUSTER_CREATED, OTP_
 
 ---
 
-## When Not to Use BuildPipe AI
+## When Not to Use Infralark
 
 - Simple one-off kubectl debugging
 - Full ITSM replacement
 - Multi-tenant SaaS without customization
 - GitOps-driven deployments
 
-Integrate BuildPipe AI as one component in a broader toolchain.
+Integrate Infralark as one component in a broader toolchain.

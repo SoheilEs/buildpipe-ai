@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide covers deploying BuildPipe AI with Docker Compose, production considerations, operations, and troubleshooting.
+This guide covers deploying Infralark with Docker Compose, production considerations, operations, and troubleshooting.
 
 ## Prerequisites
 

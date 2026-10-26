@@ -2,6 +2,24 @@
 
 Results are Passed / Failed / Not run / Blocked. Entries from 2026-10-23 and earlier are BuildPipe-era history and keep their original wording.
 
+## 2026-10-26: Infralark Phase 1 display rename (local, Node v24.18.0)
+
+Branch `infralark/phase-1-rename` from `main` at `199142a`.
+
+| Command | Result |
+|---|---|
+| `npm run build` | Passed: 8/8 tasks |
+| `npm run typecheck` | Passed: 12/12 tasks |
+| `npm test` | Passed: 5 suites, 40 tests |
+| `npm run test:e2e` | Passed: 3 suites, 43 tests (the Swagger-title assertion now expects `Infralark API`) |
+| `npm run lint` | Passed |
+| `npm run format:check` | Passed after `prettier --write` on `app.setup.ts` (the first run failed on a long line) |
+| `bash -n infrastructure/scripts/smoke.sh` | Passed (syntax only) |
+| Docs link check | Passed: 0 broken |
+| GitHub CI on this branch | Not run yet |
+| Docker image build, `docker-up.ps1`, MCP server on stdio | Not run (only log text changed; not exercised) |
+| Mutation check | Not run: the only behavioural assertion changed is a string literal |
+
 ## 2026-10-26: Infralark Phase 0 baseline (local, Windows 11, Node v24.18.0)
 
 Branch `infralark/foundation` from `main` at `52b43d9` (after PRs #5, #6, #7 merged). Only docs, `CLAUDE.md`, one code comment path (`otp.service.ts`) differ from `main`.
