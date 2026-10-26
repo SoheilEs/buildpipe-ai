@@ -1,0 +1,94 @@
+name: Deploy staging
+
+# DRAFT, UNVERIFIED. This workflow has never run: there is no staging cluster (blocker B1),
+# no published image (M5) and no Helm chart (Phase 5). It is manual-only and does nothing
+# until the repository variable STAGING_DEPLOY_ENABLED is set to "true".
+# Staging only. There is no production deploy in the MVP (CLAUDE.md "Never").
+# Setup: docs/runbooks/staging-deploy-setup.md. Design: docs/adr/0005-staging-cd.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_digest:
+        description: 'Image digest to deploy, e.g. sha256:<64 hex>. Tags are not accepted.'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+# One staging deploy at a time; a running deploy is never cancelled mid-rollout.
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to staging
+    # Only from main, and only when the owner has switched it on.
+    if: github.ref == 'refs/heads/main' && vars.STAGING_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    # Environment protection (required reviewers, secrets) is configured in GitHub, not here.
+    environment: staging
+    env:
+      IMAGE_DIGEST: ${{ inputs.image_digest }}
+      IMAGE_REPOSITORY: ${{ vars.STAGING_IMAGE_REPOSITORY }}
+      STAGING_NAMESPACE: ${{ vars.STAGING_NAMESPACE }}
+      KUBECONFIG_B64: ${{ secrets.STAGING_KUBECONFIG_B64 }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Inputs reach the shell only through env vars, never through ${{ }} in the script.
+      - name: Validate inputs and configuration
+        run: |
+          set -eu
+          case "$IMAGE_DIGEST" in
+            sha256:*) ;;
+            *) echo "image_digest must start with sha256:" >&2; exit 1 ;;
+          esac
+          hex="${IMAGE_DIGEST#sha256:}"
+          if ! printf '%s' "$hex" | grep -Eq '^[0-9a-f]{64}$'; then
+            echo "image_digest must be sha256: followed by 64 lowercase hex characters" >&2
+            exit 1
+          fi
+          for name in IMAGE_REPOSITORY STAGING_NAMESPACE KUBECONFIG_B64; do
+            eval "value=\${$name:-}"
+            if [ -z "$value" ]; then
+              echo "BLOCKED: $name is not configured for the staging environment" >&2
+              exit 1
+            fi
+          done
+          if [ "$STAGING_NAMESPACE" = "default" ] || [ "$STAGING_NAMESPACE" = "kube-system" ]; then
+            echo "BLOCKED: refusing to deploy into namespace $STAGING_NAMESPACE" >&2
+            exit 1
+          fi
+          if [ ! -f deploy/helm/infralark/Chart.yaml ]; then
+            echo "BLOCKED: deploy/helm/infralark does not exist yet (Helm chart is Phase 5)" >&2
+            exit 1
+          fi
+
+      - name: Write kubeconfig
+        run: |
+          set -eu
+          umask 077
+          printf '%s' "$KUBECONFIG_B64" | base64 -d > "$RUNNER_TEMP/kubeconfig"
+          echo "KUBECONFIG=$RUNNER_TEMP/kubeconfig" >> "$GITHUB_ENV"
+
+      # The identity in the kubeconfig must be limited to this namespace (see the runbook).
+      # helm --atomic rolls back to the previous release if the rollout does not become ready.
+      - name: Helm upgrade
+        run: |
+          set -eu
+          helm upgrade --install infralark deploy/helm/infralark \
+            --namespace "$STAGING_NAMESPACE" \
+            --set-string "image.repository=$IMAGE_REPOSITORY" \
+            --set-string "image.digest=$IMAGE_DIGEST" \
+            --atomic --wait --timeout 5m
+
+      - name: Remove kubeconfig
+        if: always()
+        run: rm -f "$RUNNER_TEMP/kubeconfig"

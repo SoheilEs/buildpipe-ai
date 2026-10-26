@@ -8,7 +8,7 @@ IMPLEMENTED means the code or document exists. VERIFIED means tests or CI eviden
 | Phase | Scope | Status | Evidence | Blockers |
 |---|---|---|---|---|
 | 0 | Repository audit and plan | VERIFIED (CI) | Merged in PR #8 (199142a); CI run 40363558037 green (3 checks). Docs: [architecture/overview.md](architecture/overview.md), [product/infralark-mvp.md](product/infralark-mvp.md), ADR [0001](adr/0001-request-state-machine.md), [0002](adr/0002-module-boundaries-and-legacy.md), [0003](adr/0003-frontend-scope.md) | ADR-0001 state set taken as accepted by merge; owner can still amend |
-| 1 | Display rename, docs skeleton, CI | IN_PROGRESS | Branch `infralark/phase-1-rename`: display rename and [ADR-0004](adr/0004-identifiers-keep-buildpipe-names.md) IMPLEMENTED, local checks in [testing.md](testing.md); not yet in CI. See sub-items below | Staging CD blocked by B1; frontend content edit is a separate repo (ADR-0003) |
+| 1 | Display rename, docs skeleton, CI | IN_PROGRESS | 1.1 merged in PR #9 (eb08cd4), CI run 40365615314 green. 1.5 draft on branch `infralark/phase-1-5-staging-cd`. Sub-items below | Staging CD blocked by B1; frontend content edit is a separate repo (ADR-0003) |
 | 2 | Read-only end-to-end flow | NOT_STARTED | — | PostgreSQL step first (owner decision) |
 | 3 | Approval, Git PR, staging execution, verification | NOT_STARTED | — | Staging cluster (B1), scoped Git credential |
 | 4 | Fixtures, reproducible staging, demo, metrics | NOT_STARTED | — | — |
@@ -20,14 +20,14 @@ Open owner inputs: staging cluster or permission to use kind in CI (B1); LLM key
 
 | Item | Status | Note |
 |---|---|---|
-| 1.1 Display rename + identifier ADR | IMPLEMENTED (local checks pass) | Identifiers kept on purpose, listed in ADR-0004 |
+| 1.1 Display rename + identifier ADR | VERIFIED (CI) | Merged in PR #9; ADR-0004 lists identifiers kept on purpose |
 | 1.2 Translation-ready strings | NOT APPLICABLE here | Backend has no UI text; the frontend repo already uses next-intl (en, de) |
 | 1.3 Docs skeleton | IMPLEMENTED | `docs/runbooks/` is a placeholder until Phase 4 |
 | 1.4 CI | Existing, unchanged | `ci.yml` already runs `npm ci` (lockfile), build, typecheck, unit, e2e, ESLint, Prettier, actionlint |
-| 1.5 Staging CD workflow | NOT_STARTED, BLOCKED (B1) | Workflow and setup guide can be drafted; it cannot be run without a staging target |
-| 1.6 Frontend content edit (repo `Desktop/velnor`) | NOT_STARTED | Content only, no design change (ADR-0003) |
+| 1.5 Staging CD workflow | DRAFT, unverified, BLOCKED (B1) | `deploy-staging.yml` passes actionlint only; never run. [ADR-0005](adr/0005-staging-cd.md), [runbook](runbooks/staging-deploy-setup.md). Needs a staging cluster, a published image (M5) and a Helm chart (Phase 5) |
+| 1.6 Frontend content edit (repo `Desktop/velnor`) | IMPLEMENTED locally | Branch `content/infralark-product`, commit 137b9ce, not pushed; lint, typecheck, build pass (ADR-0003) |
 
-Next action: owner reviews the Phase 1 PR; then 1.6 (frontend content) and 1.5 (staging CD draft).
+Next action: owner reviews the 1.5 draft PR; then Phase 2.0 (PostgreSQL migration). Pending owner inputs: staging cluster or kind-in-CI approval (B1), push of the frontend branch.
 
 ## BuildPipe baseline milestones (carried over)
 

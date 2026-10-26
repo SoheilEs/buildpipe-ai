@@ -2,6 +2,20 @@
 
 Results are Passed / Failed / Not run / Blocked. Entries from 2026-10-23 and earlier are BuildPipe-era history and keep their original wording.
 
+## 2026-10-26: Phase 1.5 staging deploy workflow draft (local)
+
+Branch `infralark/phase-1-5-staging-cd` from `main` at `eb08cd4`. Only a workflow, docs and an ADR changed.
+
+| Check | Result |
+|---|---|
+| `go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12` on `deploy-staging.yml` and `ci.yml` | Passed (exit 0). Sanity check: the same command reports an error on a deliberately broken workflow |
+| `npm run format:check`, `npm run lint` | Passed |
+| Docs link check | Passed: 0 broken |
+| Build, typecheck, unit, e2e | Not run: no source code changed |
+| Workflow execution (variable gate, input validation, kubeconfig handling, Helm, rollback) | **Not run** (no staging cluster, image or chart) |
+| `helm` and `kubectl` present on `ubuntu-24.04` | Not verified |
+| GitHub CI on this branch | Not run yet |
+
 ## 2026-10-26: Infralark Phase 1 display rename (local, Node v24.18.0)
 
 Branch `infralark/phase-1-rename` from `main` at `199142a`.
