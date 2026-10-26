@@ -10,7 +10,8 @@ import {
 } from './dto/kubernetes.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/auth.decorators';
+import { Roles, RequireOtp } from '../auth/decorators/auth.decorators';
+import { OtpGuard } from '../auth/guards/otp.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @ApiTags('kubernetes')
@@ -82,13 +83,15 @@ export class KubernetesController {
 
   @Post('deployments/restart')
   @Roles(UserRole.operator)
+  @UseGuards(OtpGuard)
+  @RequireOtp('deployment_restart')
   @ApiOperation({ summary: 'Restart deployment (OTP required)' })
   restartDeployment(
     @Param('clusterId') clusterId: string,
     @CurrentUser() user: User,
     @Body() dto: RestartDeploymentDto,
   ) {
-    return this.k8sService.restartDeployment(clusterId, user.id, dto.namespace, dto.name, dto.otp);
+    return this.k8sService.restartDeployment(clusterId, user.id, dto.namespace, dto.name);
   }
 
   @Get('health')

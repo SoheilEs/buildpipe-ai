@@ -31,6 +31,8 @@ Send OTP via POST /auth/otp/request, then include code in:
 - Header: x-otp-code: 123456
 - Or body field: otp: "123456"
 
+The route declares the requirement (`@UseGuards(OtpGuard)` + `@RequireOtp(purpose)`) and the guard verifies and consumes the code exactly once. Services do not verify it again. Missing code: 400. Wrong, expired or already used code: 401. `purpose` must be one of `cluster_register`, `cluster_update`, `deployment_restart`, `mcp_sensitive`, `login_verification` (400 otherwise). `POST /auth/otp/request` returns `devCode` only when `OTP_DEV_MODE=true`.
+
 ## Auth Endpoints
 
 | Method | Path | Auth | Description |

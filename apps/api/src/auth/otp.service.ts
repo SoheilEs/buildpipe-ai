@@ -36,14 +36,16 @@ export class OtpService {
       metadata: { purpose },
     });
 
-    const from = this.config.get('OTP_EMAIL_FROM');
-    this.logger.log(`OTP for ${purpose} sent to user ${userId} (from: ${from}): ${code}`);
+    // Fail closed: the code only leaves this method when OTP_DEV_MODE is explicitly 'true'.
+    // There is no delivery channel yet (see docs/development/blockers.md B7), so without
+    // the flag an OTP is issued but cannot reach the user.
+    if (this.config.get<string>('OTP_DEV_MODE') === 'true') {
+      this.logger.warn(`OTP_DEV_MODE: OTP for ${purpose} user ${userId}: ${code}`);
+      return { message: 'OTP issued (dev mode)', devCode: code };
+    }
 
-    const isDev = this.config.get('NODE_ENV') !== 'production';
-    return {
-      message: 'OTP sent to registered email',
-      ...(isDev ? { devCode: code } : {}),
-    };
+    this.logger.log(`OTP issued for ${purpose} user ${userId}`);
+    return { message: 'OTP issued' };
   }
 
   async verifyOtp(userId: string, code: string, purpose: OtpPurpose): Promise<boolean> {
