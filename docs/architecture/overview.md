@@ -4,7 +4,7 @@ Date: 2026-10-26. Audited commit: `main` at `52b43d9`. Older detail: [architectu
 
 ## Current (verified by reading the repo)
 
-NestJS API (`apps/api`) + BullMQ worker (`apps/worker`) + Prisma 6 on SQLite (no migrations) + Redis + NATS. Legacy modules: incidents with a state machine, AI analysis (OpenAI/Anthropic, hard-coded), MCP bridge, a heuristic `ai-engine`, Kubernetes read plus deployment restart. No frontend, no Git, scanner or executor adapter. CI runs build, typecheck, unit, e2e, ESLint, Prettier and actionlint, and `main` is protected by ruleset `protect-main`.
+NestJS API (`apps/api`) + BullMQ worker (`apps/worker`) + Prisma 6 on PostgreSQL 16 with `prisma migrate` (Phase 2.0; was SQLite without migrations) + Redis + NATS. Legacy modules: incidents with a state machine, AI analysis (OpenAI/Anthropic, hard-coded), MCP bridge, a heuristic `ai-engine`, Kubernetes read plus deployment restart. No frontend, no Git, scanner or executor adapter. CI runs build, typecheck, unit, e2e, ESLint, Prettier and actionlint, and `main` is protected by ruleset `protect-main`.
 
 ## Target (modular monolith, same runtime)
 

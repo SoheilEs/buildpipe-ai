@@ -1,4 +1,22 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-infralark}
+      POSTGRES_DB: ${POSTGRES_DB:-infralark}
+      # No default on purpose: compose refuses to start until the password is set in .env.
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env (openssl rand -hex 24)}
+    ports:
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-infralark} -d ${POSTGRES_DB:-infralark}']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
   redis:
     image: redis:7-alpine
     ports:
@@ -32,13 +50,13 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: file:/app/data/buildpipe.db
+      DATABASE_URL: postgresql://${POSTGRES_USER:-infralark}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-infralark}?schema=public
       REDIS_HOST: redis
       NATS_URL: nats://nats:4222
       NODE_ENV: production
-    volumes:
-      - buildpipe_data:/app/data
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
       nats:
@@ -52,16 +70,16 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: file:/app/data/buildpipe.db
+      DATABASE_URL: postgresql://${POSTGRES_USER:-infralark}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@postgres:5432/${POSTGRES_DB:-infralark}?schema=public
       REDIS_HOST: redis
       NATS_URL: nats://nats:4222
       API_INTERNAL_URL: http://api:3000
       NODE_ENV: production
-    volumes:
-      - buildpipe_data:/app/data
     depends_on:
       api:
         condition: service_started
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
       nats:
@@ -85,4 +103,4 @@ services:
 
 volumes:
   redis_data:
-  buildpipe_data:
+  postgres_data:

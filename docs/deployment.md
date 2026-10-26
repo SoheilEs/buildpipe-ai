@@ -78,16 +78,16 @@ See [Configuration](./configuration.md) for the full variable reference.
 
 | Volume | Mount | Contents |
 |--------|-------|----------|
-| buildpipe_data | /app/data (api, worker) | SQLite database |
+| postgres_data | /var/lib/postgresql/data (postgres) | PostgreSQL data |
 | redis_data | /data (redis) | Queue state |
 
-Backup `buildpipe_data` volume regularly in production. The SQLite file is `buildpipe.db`.
+Back up the database regularly in production, for example with `pg_dump`. There is no automated backup or restore runbook yet. The old SQLite volume `buildpipe_data` is no longer used and its data is **not** migrated automatically (see "Upgrading from SQLite").
 
 ## API Container Startup
 
 `entrypoint-api.sh` runs on every API start:
 
-1. `npx prisma db push` - apply schema
+1. `npx prisma migrate deploy` - apply pending migrations
 2. `npx tsx prisma/seed.ts` - seed admin (errors ignored if exists)
 3. `node apps/api/dist/main.js` - start server
 
@@ -140,7 +140,7 @@ Tests health, register, login, profile, list incidents via curl.
 - [ ] Restrict CORS_ORIGIN to your domain
 - [ ] Add real OPENAI_API_KEY or ANTHROPIC_API_KEY
 - [ ] Configure OAuth if using GitHub/Google login
-- [ ] Set up volume backups for buildpipe_data
+- [ ] Set up PostgreSQL backups (`pg_dump` or volume snapshots) and test a restore
 - [ ] Put reverse proxy (nginx/Traefik) with TLS in front of port 3000
 - [ ] Do not expose Redis (6379) or NATS (4222) publicly
 - [ ] Configure Docker Desktop proxy if behind corporate firewall
@@ -150,8 +150,8 @@ Tests health, register, login, profile, list incidents via curl.
 
 Current architecture is single-instance:
 
-- SQLite does not support multi-writer API replicas
-- For HA: migrate to PostgreSQL, external Redis, NATS cluster
+- PostgreSQL allows several API replicas, but the stack as shipped runs one instance of each service and multi-replica operation has not been tested
+- For HA: a managed or replicated PostgreSQL, external Redis, NATS cluster
 - Worker can scale horizontally with shared Redis (multiple consumers per queue)
 - AI Engine is stateless and can scale independently
 
@@ -189,7 +189,7 @@ Configure your MCP client to launch this process.
 docker compose logs api
 ```
 
-Common causes: missing JWT_SECRET, DATABASE_URL path not writable, Redis/NATS not healthy.
+Common causes: missing JWT_SECRET, missing or placeholder POSTGRES_PASSWORD, PostgreSQL not healthy, a migration that failed (see the `Running database migrations` line in the log), Redis/NATS not healthy.
 
 ### Worker not processing jobs
 
@@ -215,7 +215,7 @@ docker compose down -v
 docker compose up --build -d
 ```
 
-Warning: `-v` deletes volumes including SQLite data.
+Warning: `-v` deletes volumes including the PostgreSQL data.
 
 ## Updating
 
@@ -224,7 +224,11 @@ git pull
 .\infrastructure\scripts\docker-up.ps1
 ```
 
-Schema changes apply automatically via `prisma db push` on API startup.
+Pending migrations in `prisma/migrations/` apply automatically via `prisma migrate deploy` on API startup.
+
+### Upgrading from SQLite
+
+Before this change the stack stored data in a SQLite file in the `buildpipe_data` volume. PostgreSQL starts empty: users, clusters, incidents and audit history are **not** carried over, and there is no import tool. No production data is known to exist, so a one-off importer was not written; if you have data you need, export it from the old volume before upgrading. `.env` needs the new `POSTGRES_*` variables (see `.env.example`).
 
 ## Related
 
