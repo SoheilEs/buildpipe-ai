@@ -24,7 +24,8 @@ Full documentation is in the [docs/](./docs/) folder:
 ```powershell
 copy .env.example .env
 npm install
-npm run db:push
+docker compose up -d postgres   # needs POSTGRES_PASSWORD in .env
+npm run db:deploy
 npm run db:seed
 npm run dev:api
 ```

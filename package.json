@@ -18,7 +18,7 @@
     "test:e2e": "turbo run test:e2e",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push",
+    "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "typecheck": "turbo run typecheck",
     "format": "prettier --write .",

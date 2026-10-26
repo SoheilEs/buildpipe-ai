@@ -46,7 +46,7 @@ There is no frontend in this repository. Clients use REST, Swagger, WebSocket, o
 
 ## Tech Stack
 
-Node.js 20+, TypeScript 5.7, NestJS 10, Prisma 6, SQLite, BullMQ, Redis 7, NATS 2, Socket.IO, @kubernetes/client-node, OpenAI/Anthropic APIs, Docker Compose.
+Node.js 20+, TypeScript 5.7, NestJS 10, Prisma 6, PostgreSQL, BullMQ, Redis 7, NATS 2, Socket.IO, @kubernetes/client-node, OpenAI/Anthropic APIs, Docker Compose.
 
 ## Repository Structure
 

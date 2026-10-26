@@ -21,7 +21,7 @@ Edit `.env` for local development:
 
 ```env
 NODE_ENV=development
-DATABASE_URL=file:./data/buildpipe.db
+DATABASE_URL=postgresql://infralark:<password>@localhost:5432/infralark?schema=public
 REDIS_HOST=localhost
 REDIS_PORT=6379
 NATS_URL=nats://localhost:4222
@@ -47,7 +47,7 @@ If npm fails with ECONNRESET, retry or check network/proxy settings. See `.npmrc
 ## Database Setup
 
 ```powershell
-npm run db:push      # Apply schema to SQLite
+npm run db:deploy    # Apply migrations (needs a running PostgreSQL, e.g. `docker compose up -d postgres`)
 npm run db:seed      # Create admin user
 npm run db:generate  # Regenerate Prisma client
 ```
@@ -111,7 +111,7 @@ Requires MCP_JWT_TOKEN (get from POST /auth/login) and API running.
 | npm run lint | Lint all workspaces |
 | npm run test | Run tests |
 | npm run db:generate | prisma generate |
-| npm run db:push | prisma db push |
+| npm run db:deploy | prisma migrate deploy |
 | npm run db:migrate | prisma migrate dev |
 | npm run db:seed | Seed admin user |
 
@@ -184,7 +184,7 @@ npm run test -w @buildpipe/api
 ### Change database schema
 
 1. Edit prisma/schema.prisma
-2. npm run db:push
+2. `npm run db:migrate -- --name <what_changed>` (creates and applies a migration; commit the new folder in `prisma/migrations/`)
 3. npm run db:generate
 4. Update affected services
 
@@ -225,7 +225,7 @@ Console output with job name and id.
 npx prisma studio
 ```
 
-Opens GUI for SQLite at localhost:5555
+Opens a database GUI at localhost:5555
 
 ## File Encoding Note
 

@@ -64,6 +64,16 @@ export function validateEnv(config: Record<string, unknown>): Record<string, unk
     }
   }
 
+  // SQLite was replaced by PostgreSQL (ADR-0006). A leftover file: URL would otherwise only fail
+  // later, inside Prisma, with a less helpful message.
+  const databaseUrl = str('DATABASE_URL');
+  if (databaseUrl && !/^postgres(ql)?:[/][/]/.test(databaseUrl)) {
+    problems.push('DATABASE_URL must be a postgresql:// URL (SQLite is no longer supported)');
+  }
+  if (databaseUrl && /change[-_]?me/i.test(databaseUrl)) {
+    problems.push('DATABASE_URL still contains the CHANGE_ME placeholder (set POSTGRES_PASSWORD)');
+  }
+
   const origins = parseCorsOrigins(str('CORS_ORIGIN'));
   if (str('NODE_ENV') === 'production' && origins.includes('*')) {
     problems.push(

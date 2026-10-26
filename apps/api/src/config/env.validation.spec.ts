@@ -10,6 +10,30 @@ const validEnv = () => ({
   ENCRYPTION_KEY: strong('enc'),
 });
 
+describe('validateEnv DATABASE_URL', () => {
+  it('accepts a postgresql:// URL', () => {
+    expect(() =>
+      validateEnv({ ...validEnv(), DATABASE_URL: 'postgresql://u:p@db:5432/app?schema=public' }),
+    ).not.toThrow();
+  });
+
+  it('accepts a missing DATABASE_URL (the API does not require it at boot)', () => {
+    expect(() => validateEnv(validEnv())).not.toThrow();
+  });
+
+  it('rejects a DATABASE_URL that still has the CHANGE_ME placeholder', () => {
+    expect(() =>
+      validateEnv({ ...validEnv(), DATABASE_URL: 'postgresql://u:CHANGE_ME@db:5432/app' }),
+    ).toThrow(/CHANGE_ME placeholder/);
+  });
+
+  it.each(['file:/app/data/buildpipe.db', 'mysql://u:p@db/app'])('rejects %s', (url) => {
+    expect(() => validateEnv({ ...validEnv(), DATABASE_URL: url })).toThrow(
+      /DATABASE_URL must be a postgresql/,
+    );
+  });
+});
+
 describe('validateEnv (S4)', () => {
   it('accepts strong, distinct secrets', () => {
     const env = validEnv();

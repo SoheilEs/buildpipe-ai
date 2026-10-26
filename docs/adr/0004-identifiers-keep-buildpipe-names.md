@@ -12,7 +12,7 @@ Phase 1 changes the **display name** to Infralark (README, docs prose, Swagger t
 |---|---|---|---|
 | `@buildpipe/*` (api, worker, ai-engine, mcp-server, config, shared-types, kubernetes-sdk, ai-sdk) and root `buildpipe-ai` | every `package.json`, imports in ~25 files, Dockerfiles `npm run build -w ...`, `package-lock.json` | Internal workspace names; users never see them | Large mechanical diff, lockfile churn, Docker build breakage |
 | GitHub repository `SoheilEs/buildpipe-ai` | remote, clone URLs in docs, ruleset | Renaming the remote is an owner action | Broken clones, PR links, CI badges |
-| `buildpipe.db` file and `buildpipe_data` volume | `docker-compose.yml`, `.env.example`, docs | Existing deployments hold data there | Data appears lost after upgrade |
+| ~~`buildpipe.db` file and `buildpipe_data` volume~~ | replaced by PostgreSQL in Phase 2.0 ([ADR-0006](0006-postgresql.md)) | SQLite is gone; the old volume is no longer used and is not migrated | n/a |
 | Compose project and container names (`buildpipe-ai-api`, `-worker`, `-ai-engine`) | derived from the directory name | Operators' scripts and monitoring | Orphaned containers and volumes |
 | `scryptSync(key, 'buildpipe-salt', 32)` | `apps/api/src/common/crypto/encryption.service.ts` | Changing it makes every stored kubeconfig undecryptable | Data loss |
 | MCP server name `buildpipe-ai` | `apps/mcp-server/src/server.ts` | MCP clients may key their config on it | Client config breaks silently |
@@ -32,7 +32,7 @@ This repo is a backend with no UI text, so there is nothing to make translation-
 
 ## Proposed non-destructive migration (later, owner decision)
 
-1. When Phase 2 moves to PostgreSQL, create the new database under an Infralark name and migrate data; the SQLite file is retired, not renamed.
+1. PostgreSQL (ADR-0006) already uses Infralark names for the database and user (`infralark`) and the volume `postgres_data`; the SQLite file `buildpipe.db` and volume `buildpipe_data` are retired, not renamed.
 2. Rename the npm scope in one dedicated PR (`@buildpipe/*` to `@infralark/*`) with a codemod and a rebuilt lockfile, only when no open PR touches imports.
 3. Rename the GitHub repository (owner action); GitHub redirects old URLs. Then update docs links.
 4. Introduce a new encryption salt with a versioned ciphertext prefix so old and new records both decrypt, then re-encrypt in a migration.

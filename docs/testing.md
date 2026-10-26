@@ -2,6 +2,29 @@
 
 Results are Passed / Failed / Not run / Blocked. Entries from 2026-10-23 and earlier are BuildPipe-era history and keep their original wording.
 
+## 2026-10-26: Phase 2.0 PostgreSQL migration (local, Node v24.18.0)
+
+Branch `infralark/phase-2-0-postgres` from `main` at `3c2afec`.
+
+| Check | Result |
+|---|---|
+| `npm run build` | Passed: 8/8 tasks |
+| `npm run typecheck` | Passed: 12/12 tasks |
+| `npm test` | Passed: 5 suites, 45 tests (5 new `DATABASE_URL` validation tests) |
+| `npm run test:e2e` | Passed: 3 suites, 43 tests. These tests stub Prisma and do **not** touch a database |
+| `npm run lint`, `npm run format:check` | Passed |
+| Mutation check: old `env.validation.ts` against the new tests | 3 failed, 42 passed (file URL, mysql URL and the CHANGE_ME URL are no longer rejected). The two "accepts" tests already passed on the old code. Fix restored: 45 passed |
+| Real PostgreSQL 16.14 (embedded-postgres build for Windows, throwaway, port 54329; **not** the `postgres:16-alpine` image) | `prisma migrate deploy` applied `20261026000000_baseline`; `migrate status`: "Database schema is up to date"; `migrate diff --exit-code` against the schema: "No difference detected" (exit 0) |
+| Drift detection mutation: add a column to `schema.prisma` without a migration | `migrate diff --exit-code` reported "Added column extraColumn", exit 2. Schema restored |
+| Seed against that database | First run created the admin; second run reported "already exists; left unchanged"; one user row with role admin. Passed only after `prisma generate` re-generated the client for PostgreSQL (before that the seed failed against the stale SQLite client) |
+| `docker compose config` without `POSTGRES_PASSWORD` | Refused with the "set POSTGRES_PASSWORD" message (fail closed) |
+| `docker compose config` with a password and `.env` from `.env.example` | Passed: api and worker `DATABASE_URL` point at `postgres:5432`; services wait for a healthy postgres |
+| `bash -n entrypoint-api.sh`, actionlint v1.7.12 on `ci.yml` | Passed (syntax only) |
+| Docs link check | Passed: 0 broken |
+| `docker compose up`, image builds, API or worker booting against PostgreSQL | **Not run** (Docker daemon not running locally) |
+| New CI job `Migrations` on GitHub | **Not run yet** |
+| Backup and restore (`pg_dump`) | Not run |
+
 ## 2026-10-26: Phase 1.5 staging deploy workflow draft (local)
 
 Branch `infralark/phase-1-5-staging-cd` from `main` at `eb08cd4`. Only a workflow, docs and an ADR changed.

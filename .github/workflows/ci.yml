@@ -102,3 +102,60 @@ jobs:
       # The module is fetched through the Go checksum database.
       - name: actionlint
         run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -color
+
+  migrations:
+    name: Migrations
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    # Real PostgreSQL, same major version as docker-compose.yml. The credentials only exist
+    # for this throwaway service container; they protect nothing.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci-only-throwaway-password
+          POSTGRES_DB: infralark_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d infralark_ci"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      CHECKPOINT_DISABLE: '1'
+      DATABASE_URL: postgresql://ci:ci-only-throwaway-password@localhost:5432/infralark_ci?schema=public
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node (version from .nvmrc)
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies (lockfile only)
+        run: npm ci --no-audit --no-fund
+
+      - name: Generate Prisma client
+        run: npx --no-install prisma generate
+
+      - name: Apply migrations to an empty database
+        run: npx --no-install prisma migrate deploy
+
+      # Fails (exit 2) when schema.prisma has changes that no migration covers.
+      - name: Schema drift check
+        run: npx --no-install prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code
+
+      - name: Seed runs on PostgreSQL (twice, must be idempotent)
+        env:
+          ADMIN_EMAIL: ci-admin@example.test
+          ADMIN_PASSWORD: ci-only-seed-password-0001
+        run: |
+          npx --no-install tsx prisma/seed.ts
+          npx --no-install tsx prisma/seed.ts

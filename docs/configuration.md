@@ -8,7 +8,7 @@ Validated at runtime by `@buildpipe/config` (Zod schema in `packages/config/src/
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| DATABASE_URL | SQLite connection string | file:./data/buildpipe.db |
+| DATABASE_URL | PostgreSQL connection URL | postgresql://infralark:<password>@localhost:5432/infralark?schema=public |
 | JWT_SECRET | Access token signing key (min 32 chars) | output of `openssl rand -base64 48` |
 | JWT_REFRESH_SECRET | Optional, currently unused (refresh tokens are random). Validated if set | output of `openssl rand -base64 48` |
 | ENCRYPTION_KEY | AES-256-GCM key for kubeconfigs (min 32 chars) | output of `openssl rand -base64 48` |
@@ -32,8 +32,9 @@ Validated at runtime by `@buildpipe/config` (Zod schema in `packages/config/src/
 |----------|---------|-------------|
 | DATABASE_URL | (required) | Prisma connection URL |
 
-Docker example: `file:/app/data/buildpipe.db`
-Local example: `file:./data/buildpipe.db`
+Docker Compose builds `DATABASE_URL` itself from `POSTGRES_USER`, `POSTGRES_DB` and `POSTGRES_PASSWORD` in `.env`. `POSTGRES_PASSWORD` has no default; compose refuses to start without it, and the API refuses to boot while the URL still contains `CHANGE_ME`. A `file:` (SQLite) URL is rejected at startup. Use `openssl rand -hex 24` for the password so the URL needs no escaping.
+
+Local example (API run outside Compose): `postgresql://infralark:<password>@localhost:5432/infralark?schema=public`
 
 ## Redis (BullMQ)
 
@@ -118,7 +119,7 @@ docker-compose.yml sets these for containers:
 
 ```yaml
 api:
-  DATABASE_URL: file:/app/data/buildpipe.db
+  DATABASE_URL: postgresql://<POSTGRES_USER>:<POSTGRES_PASSWORD>@postgres:5432/<POSTGRES_DB>?schema=public
   REDIS_HOST: redis
   NATS_URL: nats://nats:4222
   NODE_ENV: production
@@ -143,5 +144,5 @@ If the API fails at startup with "Invalid environment configuration", check:
 
 - JWT_SECRET and JWT_REFRESH_SECRET are at least 32 characters
 - ENCRYPTION_KEY is at least 32 characters
-- DATABASE_URL is set and non-empty
+- DATABASE_URL, if set, is a `postgresql://` URL without the `CHANGE_ME` placeholder
 - API_INTERNAL_URL is a valid URL if set

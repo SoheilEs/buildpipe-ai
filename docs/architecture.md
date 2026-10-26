@@ -15,7 +15,7 @@ Clients (REST, Swagger, WebSocket, MCP, OAuth)
    +----+----+----------+-----------+
    |    |    |          |           |
    v    v    v          v           v
-SQLite Redis NATS   Kubernetes   OpenAI/Claude
+Postgres Redis NATS Kubernetes OpenAI/Claude
         |
         v
      Worker (BullMQ consumers)
