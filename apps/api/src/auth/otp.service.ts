@@ -37,7 +37,7 @@ export class OtpService {
     });
 
     // Fail closed: the code only leaves this method when OTP_DEV_MODE is explicitly 'true'.
-    // There is no delivery channel yet (see docs/development/blockers.md B7), so without
+    // There is no delivery channel yet (see docs/history/buildpipe/blockers.md B7), so without
     // the flag an OTP is issued but cannot reach the user.
     if (this.config.get<string>('OTP_DEV_MODE') === 'true') {
       this.logger.warn(`OTP_DEV_MODE: OTP for ${purpose} user ${userId}: ${code}`);

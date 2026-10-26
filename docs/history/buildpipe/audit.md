@@ -54,7 +54,7 @@ Scope: the full repository as cloned from `github.com/SoheilEs/buildpipe-ai`.
 
 No integration, contract, e2e, or security tests. `test:e2e` points to a missing `test/jest-e2e.json`.
 
-**Baseline result: the build is broken on `main`.** `turbo run build|test` aborts because `packageManager` is missing, and `nest build` for the API fails on a wrong import path in `incident-state-machine.service.spec.ts`. Two of the three spec suites pass (5/5 tests). Details are in [test-results.md](test-results.md).
+**Baseline result: the build is broken on `main`.** `turbo run build|test` aborts because `packageManager` is missing, and `nest build` for the API fails on a wrong import path in `incident-state-machine.service.spec.ts`. Two of the three spec suites pass (5/5 tests). Details are in [test-results.md](../../testing.md).
 
 ## 5. Infrastructure
 
