@@ -3,6 +3,7 @@ import { RequestState } from './domain/request-state';
 export interface ServiceRequestRecord {
   id: string;
   kind: string;
+  serviceId: string;
   status: RequestState;
   requesterId: string;
   idempotencyKey: string | null;
@@ -25,6 +26,7 @@ export interface TransitionRecord {
 
 export interface CreateRequestInput {
   kind: string;
+  serviceId: string;
   requesterId: string;
   idempotencyKey?: string;
 }
@@ -37,6 +39,21 @@ export interface ApplyTransitionInput {
   to: RequestState;
   actorId: string;
   reason?: string;
+}
+
+export interface ListRequestsFilter {
+  status?: RequestState;
+  requesterId?: string;
+  serviceId?: string;
+  limit: number;
+  offset: number;
+}
+
+/** Thrown by `create` when `serviceId` does not reference a registered service. */
+export class UnknownServiceError extends Error {
+  constructor(readonly serviceId: string) {
+    super(`Unknown service: ${serviceId}`);
+  }
 }
 
 /**
@@ -53,6 +70,9 @@ export abstract class ServiceRequestRepository {
   ): Promise<{ record: ServiceRequestRecord; created: boolean }>;
 
   abstract findById(id: string): Promise<ServiceRequestRecord | null>;
+
+  /** Newest first. */
+  abstract list(filter: ListRequestsFilter): Promise<ServiceRequestRecord[]>;
 
   /**
    * Applies one transition and appends its history row in a single atomic step. Returns null,

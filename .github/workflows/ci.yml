@@ -152,7 +152,11 @@ jobs:
       - name: Schema drift check
         run: npx --no-install prisma migrate diff --from-url "$DATABASE_URL" --to-schema-datamodel prisma/schema.prisma --exit-code
 
-      - name: Service request tests on PostgreSQL
+      # The DB tests import code that depends on the shared-types workspace, which has to be built.
+      - name: Build shared types
+        run: npm run build -w @buildpipe/shared-types
+
+      - name: Service registry and request tests on PostgreSQL
         run: npm run test:db -w @buildpipe/api
 
       - name: Seed runs on PostgreSQL (twice, must be idempotent)

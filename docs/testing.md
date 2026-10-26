@@ -2,6 +2,24 @@
 
 Results are Passed / Failed / Not run / Blocked. Entries from 2026-10-23 and earlier are BuildPipe-era history and keep their original wording.
 
+## 2026-10-26: Phase 2.2 services registry, approver role, request API (local, Node v24.18.0)
+
+Branch `infralark/phase-2-2-services-and-requests-api` from `main` at `54e0418`.
+
+| Check | Result |
+|---|---|
+| Service validation unit tests | Passed: 93 tests (names, namespaces, kinds, workload names, repositories, branches, config paths, limits, duplicates, all-fields-at-once) |
+| Service-request unit tests (in-memory repository) | Passed: 192 tests across domain and service, including the card catalog, `SERVICE_NOT_FOUND` mapping and list filters |
+| e2e authorization suite `services-api.e2e-spec.ts` (real guards, JWT, validation pipe; services and audit stubbed) | Passed: 51 new tests, 94 e2e in total. Covers anonymous 401 on every route, the role matrix for viewer, operator, approver and admin, requester taken from the caller, rejected body fields, `Idempotency-Key` 201 vs 200, cancel ownership (own, other's as approver 403, as admin 200), reason required, no arbitrary-status endpoint |
+| Mutation checks, authorization | `POST /services` open to operator: 2 failed. Cancel ownership check removed: 1 failed. Approver below operator in the hierarchy: 2 failed. Request create open to viewer: 1 failed. Restored: 94 passed |
+| Mutation checks, validation | Allow ".." path segments: 3 failed. Allow system namespaces: 3 failed. Absolute paths: 0 failed (equivalent mutant: they are also rejected by the empty-segment rule; only the message would change) |
+| Real PostgreSQL 16.14 (throwaway embedded build, **not** the Docker image): three migrations applied, `migrate diff --exit-code` | Passed: "No difference detected". The enum value `approver` was added by `ALTER TYPE ... ADD VALUE` inside the migration without error |
+| `npm run test:db` (2 suites) | Passed: 23 tests (12 request tests updated for `serviceId`, 11 registry tests: defaults and path arrays, approver enum value, invalid definition, missing and soft-deleted cluster, duplicate name and workload 409, partial update validated as a whole, 404, delete with and without requests, audit rows) |
+| Bug found by the DB tests | The unknown-service foreign-key error was not recognised because Prisma reports the constraint in `meta.constraint`, not `meta.field_name`; fixed, the test now passes |
+| Full repo checks on the final tree | build 8/8, typecheck 12/12, unit 8 suites / 330 tests, e2e 4 suites / 94 tests, `test:db` 2 suites / 23 tests, lint, format:check, docs links: all Passed |
+| `Migrations` job with the new tests on GitHub | **First run failed** (run 40381830991): `services.db-spec.ts` could not compile because the job did not build the `shared-types` workspace (TS2307). Reproduced locally by deleting `packages/shared-types/dist` (1 suite failed to run, 13 tests ran), fixed by a `Build shared types` step before `test:db`; locally 2 suites / 23 tests pass again. Re-run on GitHub: see the PR |
+| HTTP against a real database and a real cluster | Not run. The e2e suite stubs the services; the DB suite bypasses HTTP |
+
 ## 2026-10-26: Phase 2.1 request state machine (local, Node v24.18.0)
 
 Branch `infralark/phase-2-1-request-state-machine` from `main` at `6baa592`.

@@ -35,10 +35,10 @@ Labels: Exists & verified / Partial / New / Unknown. Evidence is file paths. "Ve
 
 | Module | Class | Evidence / gap |
 |---|---|---|
-| identity | Partial | `apps/api/src/auth`, `users`; JWT, refresh rotation, RBAC viewer/operator/admin and OTP are tested (e2e). No approver role, no separation-of-duties rule |
+| identity | Partial | `apps/api/src/auth`, `users`; JWT, refresh rotation, RBAC viewer/operator/approver/admin (approver added in Phase 2.2) and OTP are tested (e2e). Separation of duties lives in the request state machine; approvals are Phase 3 |
 | integrations | Partial | `clusters` (encrypted kubeconfig), `kubernetes`, `packages/kubernetes-sdk` (read plus restart). No Git, scanner, or least-privilege per-identity credentials |
-| services | New | no registry model in `prisma/schema.prisma` |
-| service-requests | Partial (Phase 2.1) | state machine, persistence, history and idempotent create exist in `apps/api/src/service-requests` with unit and PostgreSQL tests. No controller, no service target yet (Phase 2.2) |
+| services | Partial (Phase 2.2) | registry model, strict validation, admin-only CRUD with audit, in `apps/api/src/services`. Stores locations only; no Kubernetes-side existence check yet |
+| service-requests | Partial (Phase 2.1) | state machine, persistence, history and idempotent create exist in `apps/api/src/service-requests` with unit and PostgreSQL tests. HTTP layer added in Phase 2.2: create, list, read, history, cancel; no arbitrary status endpoint |
 | evidence | Partial | `apps/api/src/ai/context/*` reduces and scores logs/events (unit-tested). No evidence records with source/version |
 | analysis | Partial | `apps/api/src/ai/*` exists but has open findings S9 (no redaction in prompt path) and S10 (no timeout); `confidence` field conflicts with product rules |
 | proposals | New | none |

@@ -6,14 +6,18 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { RequestState, TransitionFailureCode, checkTransition } from './domain/request-state';
+import { isServiceCard } from './domain/service-cards';
 import {
+  ListRequestsFilter,
   ServiceRequestRecord,
   ServiceRequestRepository,
   TransitionRecord,
+  UnknownServiceError,
 } from './service-requests.repository';
 
 export interface CreateServiceRequestInput {
   kind: string;
+  serviceId: string;
   requesterId: string;
   idempotencyKey?: string;
 }
@@ -40,8 +44,14 @@ export class ServiceRequestsService {
     input: CreateServiceRequestInput,
   ): Promise<{ request: ServiceRequestRecord; created: boolean }> {
     const kind = input.kind?.trim() ?? '';
-    if (kind === '' || kind.length > MAX_KIND_LENGTH) {
-      throw new BadRequestException({ code: 'INVALID_KIND', message: 'kind is required' });
+    if (kind === '' || kind.length > MAX_KIND_LENGTH || !isServiceCard(kind)) {
+      throw new BadRequestException({
+        code: 'INVALID_KIND',
+        message: 'kind must be a known service card',
+      });
+    }
+    if (!input.serviceId) {
+      throw new BadRequestException({ code: 'SERVICE_REQUIRED', message: 'serviceId is required' });
     }
     if (!input.requesterId) {
       throw new BadRequestException({ code: 'ACTOR_REQUIRED', message: 'requesterId is required' });
@@ -56,12 +66,27 @@ export class ServiceRequestsService {
       }
     }
 
-    const { record, created } = await this.repository.create({
-      kind,
-      requesterId: input.requesterId,
-      idempotencyKey: input.idempotencyKey?.trim(),
-    });
-    return { request: record, created };
+    try {
+      const { record, created } = await this.repository.create({
+        kind,
+        serviceId: input.serviceId,
+        requesterId: input.requesterId,
+        idempotencyKey: input.idempotencyKey?.trim(),
+      });
+      return { request: record, created };
+    } catch (error) {
+      if (error instanceof UnknownServiceError) {
+        throw new BadRequestException({
+          code: 'SERVICE_NOT_FOUND',
+          message: 'The service is not registered',
+        });
+      }
+      throw error;
+    }
+  }
+
+  list(filter: ListRequestsFilter): Promise<ServiceRequestRecord[]> {
+    return this.repository.list(filter);
   }
 
   async get(id: string): Promise<ServiceRequestRecord> {

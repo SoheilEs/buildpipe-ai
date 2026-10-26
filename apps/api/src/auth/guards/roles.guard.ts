@@ -6,7 +6,10 @@ import { ROLES_KEY } from '../decorators/auth.decorators';
 const ROLE_HIERARCHY: Record<UserRole, number> = {
   viewer: 1,
   operator: 2,
-  admin: 3,
+  // Approver is an operator who may also approve (ADR-0002). Separation of duties is enforced
+  // per request, not by the role.
+  approver: 3,
+  admin: 4,
 };
 
 @Injectable()
