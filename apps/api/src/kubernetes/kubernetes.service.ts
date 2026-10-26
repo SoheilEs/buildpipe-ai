@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { OtpPurpose } from '@prisma/client';
 import { ClustersService } from '../clusters/clusters.service';
 import { AuditService } from '../audit/audit.service';
-import { OtpService } from '../auth/otp.service';
 import { AuditAction, EVENT_SUBJECTS } from '@buildpipe/shared-types';
 import { EventsService } from '../events/events.service';
 import { WebsocketGateway } from '../websocket/websocket.gateway';
@@ -13,7 +11,6 @@ export class KubernetesFacadeService {
   constructor(
     private clusters: ClustersService,
     private audit: AuditService,
-    private otp: OtpService,
     private events: EventsService,
     private ws: WebsocketGateway,
   ) {}
@@ -91,16 +88,7 @@ export class KubernetesFacadeService {
     return events;
   }
 
-  async restartDeployment(
-    clusterId: string,
-    userId: string,
-    namespace: string,
-    name: string,
-    otp: string,
-  ) {
-    const otpValid = await this.otp.verifyOtp(userId, otp, OtpPurpose.deployment_restart);
-    if (!otpValid) throw new Error('Invalid OTP');
-
+  async restartDeployment(clusterId: string, userId: string, namespace: string, name: string) {
     const { kubeconfig, context, k8s } = await this.getK8s(clusterId);
     await k8s.deployments.restart(kubeconfig, namespace, name, context);
 

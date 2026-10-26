@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsString, MinLength } from 'class-validator';
+import { OtpPurpose } from '@prisma/client';
 
 export class RegisterDto {
   @ApiProperty({ example: 'user@buildpipe.ai' })
@@ -29,9 +30,9 @@ export class RefreshTokenDto {
 }
 
 export class RequestOtpDto {
-  @ApiProperty({ example: 'deployment_restart' })
-  @IsString()
-  purpose!: string;
+  @ApiProperty({ enum: OtpPurpose, example: 'deployment_restart' })
+  @IsEnum(OtpPurpose)
+  purpose!: OtpPurpose;
 }
 
 export class VerifyOtpDto {
@@ -39,9 +40,9 @@ export class VerifyOtpDto {
   @IsString()
   code!: string;
 
-  @ApiProperty({ example: 'deployment_restart' })
-  @IsString()
-  purpose!: string;
+  @ApiProperty({ enum: OtpPurpose, example: 'deployment_restart' })
+  @IsEnum(OtpPurpose)
+  purpose!: OtpPurpose;
 }
 
 export class AuthTokensDto {

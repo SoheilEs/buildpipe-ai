@@ -1,9 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { OtpPurpose } from '@prisma/client';
 import { PrismaService } from '../common/prisma/prisma.service';
 import { EncryptionService } from '../common/crypto/encryption.service';
 import { AuditService } from '../audit/audit.service';
-import { OtpService } from '../auth/otp.service';
 import { AuditAction, EVENT_SUBJECTS } from '@buildpipe/shared-types';
 import { CreateClusterDto, UpdateClusterDto } from './dto/clusters.dto';
 import { createKubernetesServices } from '@buildpipe/kubernetes-sdk';
@@ -18,14 +16,10 @@ export class ClustersService {
     private prisma: PrismaService,
     private encryption: EncryptionService,
     private audit: AuditService,
-    private otp: OtpService,
     private events: EventsService,
   ) {}
 
   async create(userId: string, dto: CreateClusterDto) {
-    const otpValid = await this.otp.verifyOtp(userId, dto.otp, OtpPurpose.cluster_register);
-    if (!otpValid) throw new NotFoundException('Invalid OTP');
-
     const cluster = await this.prisma.cluster.create({
       data: {
         name: dto.name,
@@ -59,8 +53,6 @@ export class ClustersService {
 
   async update(userId: string, id: string, dto: UpdateClusterDto) {
     await this.getCluster(id);
-    const otpValid = await this.otp.verifyOtp(userId, dto.otp, OtpPurpose.cluster_update);
-    if (!otpValid) throw new NotFoundException('Invalid OTP');
 
     const cluster = await this.prisma.cluster.update({
       where: { id },
