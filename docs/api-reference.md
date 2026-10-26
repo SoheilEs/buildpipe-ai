@@ -53,8 +53,8 @@ The route declares the requirement (`@UseGuards(OtpGuard)` + `@RequireOtp(purpos
 ```json
 POST /auth/login
 {
-  "email": "admin@buildpipe.ai",
-  "password": "Admin123!"
+  "email": "admin@example.com",
+  "password": "your-password"
 }
 
 Response:

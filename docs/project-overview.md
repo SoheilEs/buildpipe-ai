@@ -73,7 +73,7 @@ docs/             - Documentation
 
 ## Default Admin
 
-admin@buildpipe.ai / Admin123! (change in production)
+No default admin: the first admin comes from ADMIN_EMAIL / ADMIN_PASSWORD at seed time
 
 ## Related Docs
 

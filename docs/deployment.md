@@ -91,7 +91,7 @@ Backup `buildpipe_data` volume regularly in production. The SQLite file is `buil
 2. `npx tsx prisma/seed.ts` - seed admin (errors ignored if exists)
 3. `node apps/api/dist/main.js` - start server
 
-Default admin after seed: admin@buildpipe.ai / Admin123!
+There is no default admin. The seed script creates the first admin from `ADMIN_EMAIL` / `ADMIN_PASSWORD` (12+ characters). If it finds an existing account with the old published password `Admin123!`, it rotates that account to `ADMIN_PASSWORD`.
 
 ## Docker Build Details
 
@@ -231,3 +231,14 @@ Schema changes apply automatically via `prisma db push` on API startup.
 - [Configuration](./configuration.md)
 - [Development Guide](./development.md)
 - [Architecture](./architecture.md)
+
+## Upgrading from a version before M2.2
+
+Earlier versions shipped example secrets and created a default admin. Treat any deployment that ever used them as exposed.
+
+1. **Rotate the secrets.** Generate new values with `openssl rand -base64 48` for each of `JWT_SECRET` and `ENCRYPTION_KEY` (and `JWT_REFRESH_SECRET` if you set it). The API now refuses to start with a missing, short, placeholder or previously published value, so this step cannot be skipped. Changing `JWT_SECRET` signs everyone out.
+2. **`ENCRYPTION_KEY` protects stored kubeconfigs.** Kubeconfigs encrypted under the old key cannot be decrypted with a new one. Re-register each cluster after rotating (there is no re-encryption tool yet), and assume the old kubeconfigs were exposed: rotate the cluster credentials too.
+3. **Replace the default admin.** Set `ADMIN_EMAIL=admin@buildpipe.ai` and a strong `ADMIN_PASSWORD` before the next start; the seed rotates an account that still has the old password. Better: create your own admin, then remove `admin@buildpipe.ai`.
+4. **Review accounts.** Registration also let callers choose their own role before S11 was fixed, so list users with role `admin`, remove any you do not recognise, and review the audit log for unexpected activity.
+5. **Set `CORS_ORIGIN`.** It now defaults to no cross-origin access. If a browser app calls the API, list its origin(s). `*` is rejected in production.
+6. `entrypoint-api.sh` still tolerates a failed seed (`|| true`), so an invalid `ADMIN_PASSWORD` shows an error in the log and the API starts without an admin.

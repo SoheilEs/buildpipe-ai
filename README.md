@@ -36,7 +36,7 @@ copy .env.example .env
 .\infrastructure\scripts\docker-up.ps1
 ```
 
-Default admin: `admin@buildpipe.ai` / `Admin123!`
+There is no default admin account: set `ADMIN_EMAIL` and `ADMIN_PASSWORD` in `.env` before the first start (see `.env.example`).
 
 ## Repository
 

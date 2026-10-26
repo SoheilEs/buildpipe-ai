@@ -15,7 +15,7 @@ IMPLEMENTED means the code exists. VERIFIED means tests or CI evidence are recor
 | M1.6 | Docker build check | NOT_STARTED | — | — | M4 |
 | M1.7 | Branch protection | VERIFIED (GitHub API) | ruleset `protect-main` read back: active, no bypass, 3 required checks | [github-actions.md](../ci-cd/github-actions.md) | A rejected direct push has not been exercised; add a new job name to the ruleset whenever CI gains a job |
 | M2.1 | OTP handling: single verification, no OTP in audit/logs, fail-closed dev mode (S1, S2, S3) | IMPLEMENTED | 36 e2e + 7 unit pass locally; 9 of 12 new tests fail on the old code ([results](test-results.md)) | [audit.md](audit.md), [api-reference](../api-reference.md) | Branch `security/m2.1-otp-handling`, awaiting review. B7: no OTP delivery channel |
-| M2.2 | Secrets and CORS (S4, S5) | NOT_STARTED | — | — | — |
+| M2.2 | Secrets, default admin and CORS (S4, S5, S13) | IMPLEMENTED | 40 unit + 31 e2e pass locally; real-process boot refusals 12/12; seed run through 5 scenarios ([results](test-results.md)) | [audit.md](audit.md), [configuration](../configuration.md), [deployment](../deployment.md) | Branch `security/m2.2-secrets-cors`, awaiting review. Breaking for existing deployments, see the upgrade notes in deployment.md |
 | M2.3 | Prompt data hygiene (S9) | NOT_STARTED | — | — | — |
 | M2.4 | LLM call limits and error handling (S10) | NOT_STARTED | — | — | — |
 | M3 | Postgres + migrations + tenancy | NOT_STARTED | — | — | — |

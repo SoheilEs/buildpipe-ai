@@ -9,9 +9,9 @@ Validated at runtime by `@buildpipe/config` (Zod schema in `packages/config/src/
 | Variable | Description | Example |
 |----------|-------------|---------|
 | DATABASE_URL | SQLite connection string | file:./data/buildpipe.db |
-| JWT_SECRET | Access token signing key (min 32 chars) | random-string-32-chars-minimum |
-| JWT_REFRESH_SECRET | Refresh token signing key (min 32 chars) | another-random-32-char-string |
-| ENCRYPTION_KEY | AES-256-GCM key for kubeconfigs (min 32 chars) | 32-byte-base64-or-string |
+| JWT_SECRET | Access token signing key (min 32 chars) | output of `openssl rand -base64 48` |
+| JWT_REFRESH_SECRET | Optional, currently unused (refresh tokens are random). Validated if set | output of `openssl rand -base64 48` |
+| ENCRYPTION_KEY | AES-256-GCM key for kubeconfigs (min 32 chars) | output of `openssl rand -base64 48` |
 
 ## Server
 
@@ -22,7 +22,8 @@ Validated at runtime by `@buildpipe/config` (Zod schema in `packages/config/src/
 | AI_ENGINE_PORT | 3001 | AI Engine service port |
 | MCP_SERVER_PORT | 3002 | MCP server port (config only) |
 | API_INTERNAL_URL | http://localhost:3000 | Internal API URL for MCP/worker |
-| CORS_ORIGIN | * | Allowed CORS origins |
+| CORS_ORIGIN | (empty) | Allowed browser origins, comma separated. Empty disables cross-origin access. `*` is rejected when NODE_ENV=production. Also applies to the WebSocket gateway |
+| ADMIN_EMAIL / ADMIN_PASSWORD | (empty) | Used only by the seed script to create the first admin (password 12+ chars). Nothing is seeded when empty |
 | LOG_LEVEL | info | API log level (pino): trace, debug, info, warn, error, fatal, silent |
 
 ## Database

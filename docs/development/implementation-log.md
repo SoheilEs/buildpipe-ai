@@ -112,3 +112,13 @@
 - **Consequence to decide (B7):** there is no OTP delivery channel, so with the flag off an OTP is issued but nobody can read it. Before this change the code leaked through logs, which is how it was "delivered". Production-grade options: SMTP email, TOTP authenticator app, or approvals in the app UI.
 - **New finding S12:** remaining OTP weaknesses (no attempt limit, verify endpoint burns the code, code spent before body validation, not bound to the exact action). Phase 2's action-hash approvals supersede most of it.
 - **Next:** owner review; then M2.2 (S4, S5).
+
+## 2026-10-23: M2.2 secrets, default admin and CORS (S4, S5, S13)
+
+- **Branch:** `security/m2.2-secrets-cors` from `main` (8ce6f0a, before M2.1 merges). Nothing committed yet. Expect trivial `.env.example` and docs merge conflicts with PR #6.
+- **S4:** `.env.example` now ships `CHANGE_ME` placeholders. `validateEnv` (wired into `ConfigModule.forRoot`) stops the process at start if `JWT_SECRET` or `ENCRYPTION_KEY` is missing, under 32 chars, a placeholder, low-variety, one of 9 values published in this repo, or equal to another secret. `JWT_REFRESH_SECRET` is validated only if set because nothing uses it yet. A test pins that the shipped `.env.example` cannot boot. Not changed: the fixed scrypt salt in `EncryptionService` (changing it would break every stored kubeconfig and needs a migration, later).
+- **S5:** CORS default is now closed. `CORS_ORIGIN` is a comma-separated allowlist read on every request (so it works with `.env` values loaded after imports); `*` is rejected in production. The WebSocket gateway had a hard-coded `*` and now shares the same handler.
+- **S13 (new, critical, same class as S4):** the entrypoint seeded `admin@buildpipe.ai` / `Admin123!` on every start and the password was published in 8 places. No default admin any more; see the audit. The seed also rotates an old deployment's default account when the operator supplies `ADMIN_PASSWORD`.
+- **Operational impact (breaking, deliberate):** deployments that copy the old `.env.example` no longer start; browser apps need `CORS_ORIGIN`; docker setups need `ADMIN_EMAIL` and `ADMIN_PASSWORD`. Upgrade steps are in `docs/deployment.md`. Rotating `ENCRYPTION_KEY` invalidates stored kubeconfigs.
+- **Open:** B7 (OTP delivery) still blocks the OTP-gated actions outside dev mode. `entrypoint-api.sh` swallows seed failures with `|| true`. `main.ts` now prints startup errors cleanly and exits 1.
+- **Next:** owner review; then M2.3 (S9).

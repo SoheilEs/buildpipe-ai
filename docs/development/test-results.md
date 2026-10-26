@@ -134,3 +134,20 @@ Still not verified: Docker image builds, any real database, Redis/BullMQ, NATS o
 | Remote GitHub run | **NOT RUN** (nothing committed or pushed yet) |
 
 Limits: Kubernetes is faked at the `ClustersService` seam, so a real cluster restart is untested. The OTP table is an in-memory stub, not a real database.
+
+## 2026-10-23: M2.2 secrets, default admin and CORS (branch `security/m2.2-secrets-cors`, local, Node v24.18.0)
+
+| Item | Result |
+|---|---|
+| Unit: `env.validation.spec.ts`, `cors.spec.ts` | 33 new tests: every published secret rejected, CHANGE_ME variants, short, low-variety, duplicates, all problems reported at once without echoing values, `CORS_ORIGIN=*` rejected in production only, `.env.example` as shipped does not boot |
+| E2E: `config.e2e-spec.ts` | 7 tests: no CORS headers by default (request and preflight), exact allowlist, no-Origin requests still served; `AppModule` refuses a published secret, a placeholder, and `*` in production |
+| First e2e attempt | crashed the Jest process: `ConfigModule.forRoot()` is async, so a validation error is a rejected promise created at import. Fixed by loading a fresh `AppModule` under `jest.isolateModules` and handing it to Nest in the same tick |
+| Real process, built `dist/main.js`, 3 rounds x 4 bad configs (published secret, placeholders, `CORS_ORIGIN=*` in production, nothing set) | **12/12** exit 1 in about 1 s with `Refusing to start`, secret values not printed. A good configuration boots (stopped by the timeout; NATS/Redis being down only warns) |
+| Harness note | an earlier single run showed the published-secret case "not refusing"; it was a 15 s timeout killing a cold first start. Repeating with a 60 s timeout showed no such case |
+| Seed script, throwaway SQLite, 5 scenarios | no credentials: nobody seeded (exit 0). Short / CHANGE_ME / `Admin123!` password: exit 1, nobody seeded. Strong password: admin created and the password verifies. Existing account with the old password: rotated (old no longer matches, new does). Existing account with another password: unchanged |
+| Mutation A: restore `origin: process.env.CORS_ORIGIN ?? '*'` | 3 CORS e2e tests fail |
+| Mutation B: remove `validate: validateEnv` from `ConfigModule.forRoot` | 3 startup e2e tests fail (an earlier attempt hung because the unvalidated app tried a real database; it was stopped, the files restored, and it was rerun with a timeout) |
+| Full run: build, typecheck, unit (5 suites / 40), e2e (2 suites / 31), lint, format | all exit 0 |
+| Remote GitHub run | **NOT RUN** |
+
+Not tested: the container image, `docker compose up` with a real `.env`, the seed running inside the entrypoint, and the WebSocket CORS handler through a live socket (covered only through the shared handler's unit tests).

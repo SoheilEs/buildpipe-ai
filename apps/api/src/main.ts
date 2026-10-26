@@ -14,4 +14,8 @@ async function bootstrap() {
   app.get(Logger).log(`Swagger docs: http://localhost:${port}/api/docs`);
 }
 
-bootstrap();
+bootstrap().catch((error: unknown) => {
+  // Startup failures (for example rejected configuration) must stop the process, loudly.
+  console.error(error instanceof Error ? error.message : error);
+  process.exit(1);
+});
