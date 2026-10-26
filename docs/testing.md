@@ -17,7 +17,7 @@ Branch `infralark/phase-2-2-services-and-requests-api` from `main` at `54e0418`.
 | `npm run test:db` (2 suites) | Passed: 23 tests (12 request tests updated for `serviceId`, 11 registry tests: defaults and path arrays, approver enum value, invalid definition, missing and soft-deleted cluster, duplicate name and workload 409, partial update validated as a whole, 404, delete with and without requests, audit rows) |
 | Bug found by the DB tests | The unknown-service foreign-key error was not recognised because Prisma reports the constraint in `meta.constraint`, not `meta.field_name`; fixed, the test now passes |
 | Full repo checks on the final tree | build 8/8, typecheck 12/12, unit 8 suites / 330 tests, e2e 4 suites / 94 tests, `test:db` 2 suites / 23 tests, lint, format:check, docs links: all Passed |
-| `Migrations` job with the new tests on GitHub | **Not run yet** |
+| `Migrations` job with the new tests on GitHub | **First run failed** (run 40381830991): `services.db-spec.ts` could not compile because the job did not build the `shared-types` workspace (TS2307). Reproduced locally by deleting `packages/shared-types/dist` (1 suite failed to run, 13 tests ran), fixed by a `Build shared types` step before `test:db`; locally 2 suites / 23 tests pass again. Re-run on GitHub: see the PR |
 | HTTP against a real database and a real cluster | Not run. The e2e suite stubs the services; the DB suite bypasses HTTP |
 
 ## 2026-10-26: Phase 2.1 request state machine (local, Node v24.18.0)
