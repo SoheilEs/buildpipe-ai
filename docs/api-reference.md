@@ -170,6 +170,15 @@ Validation errors answer 400 with `code: INVALID_SERVICE` and a `problems` objec
 
 Errors from the state machine: 400 (`UNKNOWN_STATE`, `ACTOR_REQUIRED`, `REASON_REQUIRED`, `REASON_TOO_LONG`), 409 (`INVALID_TRANSITION`, `TERMINAL_STATE`, `CONCURRENT_MODIFICATION`), 403 (`SELF_APPROVAL`). There is no endpoint that sets a status directly. These endpoints are not exercised against a real cluster or a UI yet.
 
+## Evidence and findings (read-only)
+
+| Method | Path | Role | Description |
+|--------|------|------|-------------|
+| GET | /service-requests/:id/evidence | viewer | Evidence collected for the request, oldest first. Content is redacted; each item has kind, source, sourceId, sourceVersion, collectedAt, contentHash and a redaction count |
+| GET | /service-requests/:id/findings | viewer | Findings, each with the ids of the evidence it cites. Outcomes: Present, Absent, Unknown, Conflicting |
+
+There is no write endpoint: collectors write in-process, and only while the request is Collecting. See [ADR-0008](adr/0008-evidence-and-findings.md).
+
 ## Audit
 
 | Method | Path | Role | Description |

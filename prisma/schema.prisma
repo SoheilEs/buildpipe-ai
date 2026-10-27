@@ -34,6 +34,14 @@ enum RiskLevel {
   high
 }
 
+// What a finding says about the thing it is about. "Unknown" is a first-class answer.
+enum FindingOutcome {
+  Present
+  Absent
+  Unknown
+  Conflicting
+}
+
 enum WorkloadKind {
   Deployment
   StatefulSet
@@ -233,6 +241,8 @@ model ServiceRequest {
   requester   User                       @relation("ServiceRequestRequester", fields: [requesterId], references: [id], onDelete: Restrict)
   service     Service                    @relation(fields: [serviceId], references: [id], onDelete: Restrict)
   transitions ServiceRequestTransition[]
+  evidence    Evidence[]
+  findings    Finding[]
 
   @@unique([requesterId, idempotencyKey])
   @@index([status])
@@ -287,4 +297,59 @@ model Service {
 
   @@unique([clusterId, namespace, workloadKind, workloadName])
   @@index([clusterId])
+}
+
+// One observation, stored after redaction. Append-only (database trigger): a changed observation
+// is a new row. The same observation recorded twice is one row (unique key below).
+model Evidence {
+  id            String   @id @default(uuid())
+  requestId     String
+  // Catalogue and per-kind sources: apps/api/src/evidence/domain/evidence-rules.ts
+  kind          String
+  source        String
+  // Identifier at the source, e.g. "apps/v1/Deployment/staging/payments-api" or "C-0013".
+  sourceId      String
+  // resourceVersion, image digest, commit SHA or tool version. Never empty.
+  sourceVersion String
+  // When the collector saw it, not when it was stored.
+  collectedAt   DateTime
+  // Redacted JSON, at most 256 KiB.
+  content       Json
+  // sha256 of the canonical JSON of content.
+  contentHash   String
+  // How many values redaction replaced; a report can say so.
+  redactions    Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  request  ServiceRequest    @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  findings FindingEvidence[]
+
+  @@unique([requestId, source, sourceId, sourceVersion, contentHash])
+  @@index([requestId])
+}
+
+// A conclusion drawn from evidence. Append-only. Present and Absent cite evidence; Unknown may not.
+model Finding {
+  id        String         @id @default(uuid())
+  requestId String
+  code      String
+  outcome   FindingOutcome
+  summary   String
+  createdAt DateTime       @default(now())
+
+  request  ServiceRequest    @relation(fields: [requestId], references: [id], onDelete: Restrict)
+  evidence FindingEvidence[]
+
+  @@index([requestId])
+}
+
+model FindingEvidence {
+  findingId  String
+  evidenceId String
+
+  finding  Finding  @relation(fields: [findingId], references: [id], onDelete: Restrict)
+  evidence Evidence @relation(fields: [evidenceId], references: [id], onDelete: Restrict)
+
+  @@id([findingId, evidenceId])
+  @@index([evidenceId])
 }

@@ -2,6 +2,22 @@
 
 Results are Passed / Failed / Not run / Blocked. Entries from 2026-10-23 and earlier are BuildPipe-era history and keep their original wording.
 
+## 2026-10-26: Phase 2.3 evidence and findings (local, Node v24.18.0)
+
+Branch `infralark/phase-2-3-evidence-findings`, stacked on the Phase 2.2 branch (`3f3c293`) because it builds on its migration and tables.
+
+| Check | Result |
+|---|---|
+| Redaction unit tests | Passed: pattern types (Bearer, JWT, private key, GitHub, AWS, Slack, URL credentials, key=value), secret keys of any value type, Kubernetes env entries, nesting, no mutation of input, depth and node limits, idempotence |
+| Evidence-rules unit tests | Passed: canonical JSON and hash, every kind against every source, every field's rejects, clock skew, size limit, finding outcomes and evidence counts. 86 tests for the two files |
+| e2e `evidence-api.e2e-spec.ts` | Passed: anonymous 401, all four roles can read, malformed id 400, 404 relayed, no POST/PUT/PATCH/DELETE route even for admin |
+| Real PostgreSQL 16.14 (throwaway embedded build, **not** the Docker image): four migrations applied, drift check | Passed: "No difference detected" |
+| `npm run test:db` (3 suites) | Passed: 47 tests, 24 of them new for evidence: stored fields, redaction in the database row, equal-hash for equal content, idempotent and parallel inserts, invalid input stores nothing, 404, NOT_COLLECTING for Requested / ProposalReady / Cancelled, readable after the request moves on, finding rules (cites, Unknown without evidence, foreign or missing evidence refused), UPDATE / DELETE / TRUNCATE refused on all three tables |
+| Mutation checks, database layer | Status check removed: 4 failed. Redaction skipped: 1 failed. Same-request check of cited evidence removed: 2 failed. **Shared row lock removed: 0 failed with the first, racing test**, so a deterministic test was added (a transition held open in a transaction while an insert runs); with it the lock mutant fails 1 test. Restored: all pass |
+| Full repo checks on the final tree | build 8/8, typecheck 12/12, unit 10 suites / 416 tests, e2e 5 suites / 107 tests, `test:db` 3 suites / 47 tests, lint, format:check, docs links: all Passed |
+| New tests in the `Migrations` job on GitHub | **Not run yet** |
+| Collectors, real cluster, real scanner output | Not built, not run |
+
 ## 2026-10-26: Phase 2.2 services registry, approver role, request API (local, Node v24.18.0)
 
 Branch `infralark/phase-2-2-services-and-requests-api` from `main` at `54e0418`.
