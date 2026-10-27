@@ -36,6 +36,19 @@ Infralark is a commercial panel for requesting and executing standard DevOps pro
 - Rename DB/API/package/env identifiers without a compatibility review and migration plan.
 - Design a new logo.
 
+## Session start
+
+At the start of every session, and after every context clear, first read `docs/session-handoff.md`, tell the owner its state in a few lines, and continue only after the owner confirms.
+
+Working model (owner instruction, 2026-10-27): the main session is the supervisor. It plans, delegates, reviews and is the only point of contact with the owner; it does not write code itself. The work is done by the project agents in `.claude/agents/` (coder, tester, cicd, docs, context-keeper) in sequence on one step at a time: coder, then tester (loop until it passes), then cicd, then docs, then the supervisor's review of the whole diff. After each step, and whenever the context gets heavy, the supervisor calls context-keeper to rewrite `docs/session-handoff.md`. Commit, push, pull requests and Auto-fix happen only on the owner's explicit order; the owner merges.
+
+## Git identity and attribution
+
+- Commits carry only the owner's identity: the current `git config user.name` and `user.email`. No agent changes `git config`.
+- Commit messages, pull request titles and bodies, branch names, code comments and documents contain no attribution to tooling: no `Co-Authored-By` line, no "Generated with" line, no robot emoji, no tool or vendor names. `.claude/settings.json` sets empty commit and pull request attribution.
+- Before every push the supervisor checks `git log -n 5 --format=full` and the pull request text for any such trace.
+- Commits already on `main` before this rule keep their trailers; history is not rewritten.
+
 ## Phase tracker
 
 - [ ] Phase 0 — Repository audit and plan
